@@ -1,13 +1,6 @@
 import pygame
 import random
-from 山中小屋 import Image
-
-class character:
-    def __init__(self, strength, speed, mind, knowledge):
-        self.strength = strength
-        self.speed = speed
-        self.mind = mind
-        self.knowledge = knowledge
+from Image import Image
 
 class Items:
     def __init__(self, name, description, effect, image, discard_after_use, can_be_stolen):
@@ -106,6 +99,7 @@ def bottle(character):
         character.attributechange(speed, 2)
     else:
         #移动到任意房间
+        pass
         
 #蜡烛
 '''
@@ -145,6 +139,7 @@ def dark_dice(character):
         pass
     else:
         #移动到队友房间
+        pass
         
 #
 '''

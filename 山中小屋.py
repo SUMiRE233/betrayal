@@ -1,7 +1,8 @@
 import pygame
 import random
 import tkinter as tk
-import items
+from items import item
+from Image import Image
 class Color:
     ORANGE = (220, 160, 87)
     BLACK = (0, 0, 0)
@@ -45,41 +46,8 @@ class Text:
         self.upperleft_y = center_y - self.text_height / 2
         surface.blit(self.text_image, (self.upperleft_x,self.upperleft_y))
 
-class Image:
-    def __init__(self, img_name: str, ratio=0.4):
-        """
-        img_name: 图片文件名，如'background.jpg'、'ink.png',注意为字符串
-        ratio: 图片缩放比例，与主屏幕相适应，默认值为0.4
-        """
-        self.img_name = img_name
-        self.ratio = ratio
- 
-        self.picture = pygame.image.load(img_name)
-        self.img_width = self.picture.get_width()
-        self.img_height = self.picture.get_height()
- 
-        self.size_scaled = self.img_width * self.ratio, self.img_height * self.ratio
- 
-        self.image_scaled = pygame.transform.smoothscale(self.picture, self.size_scaled)
-        self.img_width_scaled = self.image_scaled.get_width()
-        self.img_height_scaled = self.image_scaled.get_height()
-        self.rect = self.image_scaled.get_rect()
-    def draw(self, surface: pygame.Surface, center_x, center_y):
-        """
-        surface: 图片放置的表面
-        center_x, center_y: 图片放置在表面的<中心坐标>
-        """
-        self.center_x=center_x
-        self.center_y=center_y
-        self.upperleft_x = self.center_x - self.img_width_scaled / 2
-        self.upperleft_y = self.center_y - self.img_height_scaled / 2
-        surface.blit(self.image_scaled, (self.upperleft_x, self.upperleft_y))
-    def scalechange(self,surface,changescale):
-        self.size_scaled = self.img_width * changescale, self.img_height * changescale
-        self.image_scaled = pygame.transform.smoothscale(self.picture, self.size_scaled)
-        self.img_width_scaled = self.image_scaled.get_width()
-        self.img_height_scaled = self.image_scaled.get_height()
-        self.draw(surface,self.center_x, self.center_y)
+
+
 class ButtonText(Text):
     def __init__(self, text: str, text_color: Color, font_type: str, font_size: int):
         super().__init__(text, text_color, font_type, font_size)
@@ -347,12 +315,12 @@ class Commoncharacter:
             #num=random.randint(0,len(Eventlist)-1)
             Eventfunclist[num](self,self)
         if type=="item":
-            if len(items) == 0:
+            if len(item) == 0:
                 print("没有可获取的物品！")
                 return
-            item = items[random.randint(0, len(items) - 1)]
-            self.bag.append(item)
-            items.remove(item)
+            get_item = item[random.randint(0, len(item) - 1)]
+            self.bag.append(get_item)
+            item.remove(get_item)
         #if type=="room":
         
             
@@ -845,7 +813,7 @@ class Ground_interface(Basicbackground):
         self.groundbutton=ButtonText("地面",color.RED,"HYJinShi-95W.ttf",30)  #将该楼层的按钮变成红色
         self.groundbutton.draw(self.display_surface,600,40)
         self.roomlist=[[0 for i in range(5)] for j in range(4)] #初始化该楼层的房间列表
-        playerlist[0].getcards("event")
+        playerlist[0].getcards("item")
         
         while self.running:
             for i in deathlist:  #在死亡列表中的角色绘制“人物已死亡”
