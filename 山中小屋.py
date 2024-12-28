@@ -1,7 +1,7 @@
 import pygame
 import random
 import tkinter as tk
-from items import item
+import items
 from Image import Image
 class Color:
     ORANGE = (220, 160, 87)
@@ -315,12 +315,14 @@ class Commoncharacter:
             #num=random.randint(0,len(Eventlist)-1)
             Eventfunclist[num](self,self)
         if type=="item":
-            if len(item) == 0:
+            if len(items.item) == 0:
                 print("没有可获取的物品！")
                 return
-            get_item = item[random.randint(0, len(item) - 1)]
+            get_item = items.item[random.randint(0, len(items.item) - 1)]
             self.bag.append(get_item)
-            item.remove(get_item)
+            if get_item == items.amulet_item:
+                items.amulet(self)
+            items.item.remove(get_item)
         #if type=="room":
         
             
@@ -813,6 +815,16 @@ class Ground_interface(Basicbackground):
         self.groundbutton=ButtonText("地面",color.RED,"HYJinShi-95W.ttf",30)  #将该楼层的按钮变成红色
         self.groundbutton.draw(self.display_surface,600,40)
         self.roomlist=[[0 for i in range(5)] for j in range(4)] #初始化该楼层的房间列表
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
+        playerlist[0].getcards("item")
         playerlist[0].getcards("item")
         
         while self.running:

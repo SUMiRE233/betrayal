@@ -18,16 +18,16 @@ def Adrenaline(dice_index):
 
 #上古护符
 def amulet(character):
-    character.attributechange(strength, 1)
-    character.attributechange(speed, 1)
-    character.attributechange(knowledge, 1)
-    character.attributechange(mind, 1)
+    character.attributechange("strength", 1)
+    character.attributechange("speed", 1)
+    character.attributechange("knowledge", 1)
+    character.attributechange("mind", 1)
     
 def lose_amulet(character):
-    character.attributechange(strength, -3)
-    character.attributechange(speed, -3)
-    character.attributechange(knowledge, -3)
-    character.attributechange(mind, -3)
+    character.attributechange("strength", -3)
+    character.attributechange("speed", -3)
+    character.attributechange("knowledge", -3)
+    character.attributechange("mind", -3)
 
 #天使羽毛  
 def feather():
@@ -50,10 +50,10 @@ def axe(character):
 '''
 #铃铛
 def bell(character):
-    character.mind += 1
+    character."mind" += 1
     
 def lose_bell(character):
-    character.mind -= 1
+    character."mind" -= 1
     
 def use_bell(dice_index):
     if (dice_index >= 5):
@@ -61,7 +61,7 @@ def use_bell(dice_index):
 
 #血棘
 def knife_of_blood(character):
-    character.speed -= 1
+    character.attributechange("speed", -1)
     if (character.strength < 6):
         dice_index = 0
         for i in range(character.strength + 3):
@@ -78,25 +78,25 @@ def bottle(character):
     for i in range(3):
         dice_index += character.Rolldice()
     if (dice_index == 0):
-        character.attributechange(strength, -2)
-        character.attributechange(speed, -2)
-        character.attributechange(mind, -2)
-        character.attributechange(knowledge, -2)
+        character.attributechange("strength", -2)
+        character.attributechange("speed", -2)
+        character.attributechange("mind", -2)
+        character.attributechange("knowledge", -2)
     elif (dice_index == 1):
-        character.attributechange(strength, -2)
-        character.attributechange(speed, -2)
+        character.attributechange("strength", -2)
+        character.attributechange("speed", -2)
     elif (dice_index == 2):
-        character.attributechange(mind, -2)
-        character.attributechange(knowledge, -2)
+        character.attributechange("mind", -2)
+        character.attributechange("knowledge", -2)
     elif (dice_index == 3):
-        character.attributechange(strength, -1)
-        character.attributechange(knowledge, 1)
+        character.attributechange("strength", -1)
+        character.attributechange("knowledge", 1)
     elif (dice_index == 4):
-        character.attributechange(mind, 2)
-        character.attributechange(knowledge, 2)
+        character.attributechange("mind", 2)
+        character.attributechange("knowledge", 2)
     elif (dice_index == 5):
-        character.attributechange(strength, 2)
-        character.attributechange(speed, 2)
+        character.attributechange("strength", 2)
+        character.attributechange("speed", 2)
     else:
         #移动到任意房间
         pass
@@ -112,28 +112,28 @@ def dark_dice(character):
     for i in range(3):
         dice_index += character.Rolldice()
     if (dice_index == 0):
-        character.attributechange(strength, -(character.strength - 1))
-        character.attributechange(speed, -(character.speed - 1))
-        character.attributechange(mind, -character.mind - 1)
-        character.attributechange(knowledge, -(character.knowledge - 1))
+        character.attributechange("strength", -(character.strength - 1))
+        character.attributechange("speed", -(character.speed - 1))
+        character.attributechange("mind", -character.mind - 1)
+        character.attributechange("knowledge", -(character.knowledge - 1))
     elif (dice_index == 1):
         #抽取事件
         pass
     elif (dice_index == 2):
         index = random.randint(1,3)
         if (index == 1):
-            character.attributechange(mind, 1)
+            character.attributechange("mind", 1)
         else:
-            character.attributechange(knowledge, 1)
+            character.attributechange("knowledge", 1)
     elif (dice_index == 3):
         #移动到相邻房间
         pass
     elif (dice_index == 4):
         index = random.randint(1,3)
         if (index == 1):
-            character.attributechange(strength, 1)
+            character.attributechange("strength", 1)
         else:
-            character.attributechange(speed, 1)
+            character.attributechange("speed", 1)
     elif (dice_index == 5):
         #所有人移动到相邻房间
         pass
@@ -150,10 +150,10 @@ def dynamite():
 def healing_ointment(character, choice):
     if (choice == "strength"):
         if (character.strength < 8):
-            character.attributechange(strength, 1)
+            character.attributechange("strength", 1)
     if (choice == "speed"):
         if (character.speed < 8):
-            character.attributechange(speed, 1)
+            character.attributechange("speed", 1)
             
 #神像
 def idol(character, choice):
@@ -170,7 +170,7 @@ def idol(character, choice):
     if choice == "knowledge":
         for i in range(min(character.knowledge + 2, 8)):
             dice_index += character.Rolldice()
-    character.mind -= 1
+    character.attributechange("mind", -1)
     return dice_index
 
 #盗贼手套
