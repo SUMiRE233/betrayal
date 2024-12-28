@@ -198,7 +198,7 @@ adrenaline_item = Items(
     name="Adrenaline",
     description="",
     effect=Adrenaline,
-    image="Adrenaline.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Adrenaline.jpg",
     discard_after_use=True,
     can_be_stolen=True
 )
@@ -209,7 +209,7 @@ amulet_item = Items(
     name="Amulet",
     description="",
     effect=amulet,
-    image="Amulet.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Amulet.jpg",
     discard_after_use=False,
     can_be_stolen=True
 )
@@ -220,7 +220,7 @@ feather_item = Items(
     name="Feather",
     description="",
     effect=feather,
-    image="Feather.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Feather.jpg",
     discard_after_use=True,
     can_be_stolen=True
 )
@@ -231,7 +231,7 @@ armor_item = Items(
     name="Armor",
     description="",
     effect=armor,
-    image="Armor.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Armor.jpg",
     discard_after_use=False,
     can_be_stolen=True
 )
@@ -242,7 +242,7 @@ axe_item = Items(
     name="Axe",
     description="",
     effect=axe,
-    image="Axe.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Axe.jpg",
     discard_after_use=False,
     can_be_stolen=True
 )
@@ -253,7 +253,7 @@ knife_of_blood_item = Items(
     name="Knife of Blood",
     description="",
     effect=knife_of_blood,
-    image="Knife of Blood.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Knife of Blood.jpg",
     discard_after_use=False,
     can_be_stolen=True
 )
@@ -264,7 +264,7 @@ bottle_item = Items(
     name="Bottle",
     description="",
     effect=bottle,
-    image="Bottle.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Bottle.jpg",
     discard_after_use=True,
     can_be_stolen=True
 )
@@ -275,7 +275,7 @@ dark_dice_item = Items(
     name="Dark Dice",
     description="",
     effect=dark_dice,
-    image="Dark Dice.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Dark Dice.jpg",
     discard_after_use=False,
     can_be_stolen=True
 )
@@ -286,7 +286,7 @@ healing_ointment_item = Items(
     name="Healing Ointment",
     description="",
     effect=healing_ointment,
-    image="Healing Ointment.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Healing Ointment.jpg",
     discard_after_use=True,
     can_be_stolen=True
 )
@@ -297,7 +297,7 @@ idol_item = Items(
     name="Idol",
     description="",
     effect=idol,
-    image="Idol.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Idol.jpg",
     discard_after_use=False,
     can_be_stolen=True
 )
@@ -308,7 +308,7 @@ gloves_of_thief_item = Items(
     name="Gloves of Thief",
     description="",
     effect=gloves_of_thief,
-    image="Gloves of Thief.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Gloves of Thief.jpg",
     discard_after_use=True,
     can_be_stolen=True
 )
@@ -319,7 +319,7 @@ magic_cube_item = Items(
     name="Magic Cube",
     description="",
     effect=magic_cube,
-    image="Magic Cube.img",
+    image=r"C:\Users\SUMiRE\Desktop\betrayal\图片\物品\Magic Cube.jpg",
     discard_after_use=False,
     can_be_stolen=True
 )
