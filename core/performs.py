@@ -5,6 +5,7 @@ import models.items
 from models.events import Eventlist, Eventfunclist
 from models.omens import Omenlist, Omenfunclist
 from models.graphics import Image, Button, ButtonText, color, Text
+from config.config import levellist, levelnow, playernow, deathlist
 
 
 class Commoncharacter:
@@ -530,7 +531,12 @@ class Choose_interface:#人物角色选择界面
     def run(self):
         self.count=0
         self.running=True
-        
+        downstairs_interface = Downstairs_interface()
+        levellist.append(downstairs_interface)
+        ground_interface = Ground_interface()
+        levellist.append(ground_interface)
+        upstairs_interface = Upstairs_interface()
+        levellist.append(upstairs_interface)
         while self.running:
             for event in pygame.event.get():
                 if event.type==pygame.QUIT:
@@ -910,12 +916,6 @@ class helpdocument:
 start_interface=Start_interface()
 start_interface.run()
 
-global currentplayerlist, deathlist, levelnow, playernow, levellist
-currentplayerlist = [0, 1, 2, 3]
-deathlist = []
-levelnow = 1
-playernow = 0
-levellist = []
 downstairs_interface = Downstairs_interface()
 levellist.append(downstairs_interface)
 ground_interface = Ground_interface()

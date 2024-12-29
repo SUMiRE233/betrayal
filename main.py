@@ -1,10 +1,10 @@
 import pygame
 from core.performs import Start_interface, Downstairs_interface, Ground_interface, Upstairs_interface
+from config.config import levellist
 
 def main():
     # 初始化游戏
     pygame.init()
-    initialize_game()
 
     # 显示开始界面并获取用户选择
     start_interface = Start_interface()
@@ -16,20 +16,6 @@ def main():
     # 退出游戏
     pygame.quit()
 
-
-def initialize_game():
-    global currentplayerlist, deathlist, levelnow, playernow, levellist
-    currentplayerlist = [0, 1, 2, 3]
-    deathlist = []
-    levelnow = 1
-    playernow = 0
-    levellist = []
-    downstairs_interface = Downstairs_interface()
-    levellist.append(downstairs_interface)
-    ground_interface = Ground_interface()
-    levellist.append(ground_interface)
-    upstairs_interface = Upstairs_interface()
-    levellist.append(upstairs_interface)
 
 
 def game_loop():
