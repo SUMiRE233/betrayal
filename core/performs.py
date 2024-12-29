@@ -1,222 +1,11 @@
 import pygame
 import random
 import tkinter as tk
-import items
-from Image import Image
-class Color:
-    ORANGE = (220, 160, 87)
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    RED = (255, 0, 0)
-    GREEN = (0, 255, 0)
-    BLUE = (0, 0, 255)
-    GREY = (128, 128, 128)
-    PURPLE = (102, 0,153)
-    TRANSPARENT = (255, 255, 255, 0)
-    LIGHTBLUE=(173, 216, 230)
-    YELLOW=(255,255,0)
-color=Color()
+import models.items
+from models.events import Eventlist, Eventfunclist
+from models.omens import Omenlist, Omenfunclist
+from models.graphics import Image, Button, ButtonText, color, Text
 
-class Text:
-    def __init__(self, text: str, text_color: Color, font_type: str, font_size: int):
-        """
-        text: 文本内容，如'大学生模拟器'，注意是字符串形式
-        text_color: 字体颜色，如Color.WHITE、COLOR.BLACK
-        font_type: 字体文件(.ttc)，如'msyh.ttc'，注意是字符串形式
-        font_size: 字体大小，如20、10
-        """
-        self.text = text
-        self.text_color = text_color
-        self.font_type = font_type
-        self.font_size = font_size
-        pygame.font.init()
-        font = pygame.font.Font(font_type, self.font_size)
-        self.text_image = font.render(self.text, True, self.text_color).convert_alpha()
- 
-        self.text_width = self.text_image.get_width()
-        self.text_height = self.text_image.get_height()
-        
- 
-    def draw(self, surface: pygame.Surface, center_x, center_y):
-        """
-        surface: 文本放置的表面
-        center_x, center_y: 文本放置在表面的<中心坐标>
-        """
-        self.upperleft_x = center_x - self.text_width / 2
-        self.upperleft_y = center_y - self.text_height / 2
-        surface.blit(self.text_image, (self.upperleft_x,self.upperleft_y))
-
-
-
-class ButtonText(Text):
-    def __init__(self, text: str, text_color: Color, font_type: str, font_size: int):
-        super().__init__(text, text_color, font_type, font_size)
-        self.rect = self.text_image.get_rect()
-        self.whether=0
- 
-    def draw(self, surface: pygame.Surface, center_x, center_y):
-        super().draw(surface, center_x, center_y)
-        self.rect.center = center_x, center_y
-    def handle_event(self):
-        self.hovered = self.rect.collidepoint(pygame.mouse.get_pos())
-        if self.hovered:
-            return True
-        return False
-
-class Button(Image):
-    def __init__(self, img_name: str, ratio=0.4):
-        super().__init__(img_name, ratio)
-        self.rect = self.image_scaled.get_rect()
- 
-    def draw(self, surface: pygame.Surface, center_x, center_y):
-        super().draw(surface, center_x, center_y)
-        self.rect.center = center_x, center_y
- 
-    def handle_event(self):
-        self.hovered = self.rect.collidepoint(pygame.mouse.get_pos())
-        if self.hovered:
-            return True
-        return False
-startscript=0 #是否已经作祟
-totalomen=0 #统计目前预兆个数
-Omenlist=[]
-Omenfunclist=[]
-class Bookomen:
-    def Book(self,character):
-        character.attributechange(2,"knowledge")
-book=Bookomen()
-Omenfunclist.append(Bookomen.Book)
-Omenlist.append(book)
-class Girlomen:
-    def Girl(self,character):
-        character.attributechange(1,"knowledge")
-        character.attributechange(1,"mind")
-girl=Girlomen()
-Omenfunclist.append(Girlomen.Girl)
-Omenlist.append(girl)
-class Dogomen:
-    def Dog(self,character):
-        character.attributechange(1,"strength")
-        character.attributechange(1,"mind")
-dog=Dogomen()
-Omenfunclist.append(Dogomen.Dog)
-Omenlist.append(dog)
-class Madmanomen:
-    def Madman(self,character):
-        character.attributechange(2,"strength")
-        character.attributechange(-1,"mind")
-madman=Madmanomen()
-Omenfunclist.append(Madmanomen.Madman)
-Omenlist.append(madman)
-class Holysymbolomen:
-    def Holysymbol(self,character):
-        character.attributechange(2,"mind")
-holysymbol=Holysymbolomen()
-Omenfunclist.append(Holysymbolomen.Holysymbol)
-Omenlist.append(holysymbol)
-class Biteomen:
-    def Bite(self,character):
-        numenemy=character.directtest(4)
-        numself=character.test("strength")
-        print("numenemy:%d"%numenemy)
-        print("numself:%d"%numself)
-        if numenemy>numself:
-            character.attributechange(numself-numenemy,"body")
-bite=Biteomen()
-Omenfunclist.append(Biteomen.Bite)
-Omenlist.append(bite)
-class Ringomen:
-    def Ring(self,character,enemy): #能力攻击  value:该能力属性值
-        numself=character.test("mind")
-        numenemy=enemy.test("mind")
-        if numself>numenemy:
-            enemy.attributechange(numenemy-numself,"spirit")
-        elif numself<numenemy:
-            character.attributechange(numself-numenemy,"spirit")
-ring=Ringomen()
-Omenfunclist.append(Ringomen.Ring)
-Omenlist.append(ring)
-class Spearomen:
-    def Spear(self,attacker,enemy): #能力攻击 
-        numself=attacker.test("strength")
-        numself+=attacker.directtest(2)
-        numenemy=enemy.test("strength")
-        print(numself)
-        print(numenemy)
-        if numself>numenemy:
-            enemy.attributechange(numenemy-numself,"body")
-        elif numself<numenemy:
-            self.attributechange(numself-numenemy,"body")
-spear=Spearomen()
-Omenfunclist.append(Spearomen.Spear)
-Omenlist.append(spear)
-
-#有修改 spider,funeral
-Eventlist=[]
-Eventfunclist=[]
-whethereventopen=[]
-class Contractevent:
-    def __init__(self):
-        #self.image=Image(r"图片\事件\contract.jpg",0.75)
-        pass
-    def Contract(self,character):
-        result=character.test("knowledge")
-        if result<=1:character.attributechange(-1,"mind")
-        elif result<=3:
-            character.attributechange(-1,"mind")
-            character.getcards("item")
-        elif result==4:character.getcards("item")
-        else:
-            character.attributechange(1,"mind") 
-            character.getcards("item")
-contract=Contractevent()
-Eventlist.append(contract)
-Eventfunclist.append(Contractevent.Contract)
-class Nightshadowevent:
-    def Nightshadow(self,character):
-        if character.test("knowledge")>=5:character.attributechange(1,"knowledge")
-nightshadow=Nightshadowevent()
-Eventlist.append(nightshadow)
-Eventfunclist.append(Nightshadowevent.Nightshadow)
-class Spiderevent:
-    def Spider(self,character):
-        result=character.test("speed")
-        if result>=4:
-            character.attributechange(1,"speed")
-        elif result>=1:
-            hurt=character.directtest(1)
-            print(hurt)
-            character.attributechange(-hurt,"body")
-        else:
-            hurt=character.directtest(2)
-            print(hurt)
-            character.attributechange(-hurt,"body")
-spider=Spiderevent()
-Eventlist.append(spider)
-Eventfunclist.append(Spiderevent.Spider)
-class Funeralevent:
-    def Funeral(self,character):
-        result=character.test("mind")
-        if result>4:
-            character.attributechange(1,"mind")
-        elif result>=2:
-            character.attributechange(-1,"mind")
-        else:
-            character.attributechange(-1,"mind")
-            character.attributechange(-1,"strength")
-            #goto地下室
-funeral=Funeralevent()
-Eventlist.append(funeral)
-Eventfunclist.append(Funeralevent.Funeral)
-
-
-
-#人物属性变化就发布相应事件，让pygame修改页面中相应属性的值
-CHANGEATTRIBUTE = pygame.USEREVENT
-changestrength= pygame.event.Event(CHANGEATTRIBUTE,{"message":"strength"})
-changespeed= pygame.event.Event(CHANGEATTRIBUTE,{"message":"speed"})
-changemind= pygame.event.Event(CHANGEATTRIBUTE,{"message":"mind"})
-changeknowledge= pygame.event.Event(CHANGEATTRIBUTE,{"message":"knowledge"})
 
 class Commoncharacter:
     def __init__(self):
@@ -315,14 +104,14 @@ class Commoncharacter:
             #num=random.randint(0,len(Eventlist)-1)
             Eventfunclist[num](self,self)
         if type=="item":
-            if len(items.item) == 0:
+            if len(models.items.item) == 0:
                 print("没有可获取的物品！")
                 return
-            get_item = items.item[random.randint(0, len(items.item) - 1)]
+            get_item = models.items.item[random.randint(0, len(models.items.item) - 1)]
             self.bag.append(get_item)
-            if get_item == items.amulet_item:
-                items.amulet(self)
-            items.item.remove(get_item)
+            if get_item == models.items.amulet_item:
+                models.items.amulet(self)
+            models.items.item.remove(get_item)
         #if type=="room":
         
             
@@ -407,7 +196,6 @@ class Commoncharacter:
             return True
         return False
     
-        
 class ProfessorLongfellow(Commoncharacter):
     def __init__(self):
         super().__init__()
@@ -653,6 +441,16 @@ class VivianLopez(Commoncharacter):
        # self.pos=
 vivianLopez=VivianLopez()
 
+characterlist=[peterAkimoto,brandonJaspers,missyDubourde,zoeIngstrom,darrinWilliams,oxBellows,heatherGranville,jennyLeclerc,fatherRhinehardt,professorLongfellow,madameZostra,vivianLopez]
+
+    
+#人物属性变化就发布相应事件，让pygame修改页面中相应属性的值
+CHANGEATTRIBUTE = pygame.USEREVENT
+changestrength= pygame.event.Event(CHANGEATTRIBUTE,{"message":"strength"})
+changespeed= pygame.event.Event(CHANGEATTRIBUTE,{"message":"speed"})
+changemind= pygame.event.Event(CHANGEATTRIBUTE,{"message":"mind"})
+changeknowledge= pygame.event.Event(CHANGEATTRIBUTE,{"message":"knowledge"})
+
 class Start_interface:
     def __init__(self):
         pygame.init()
@@ -689,7 +487,7 @@ class Start_interface:
 """
 PeterAkimoto,BrandonJaspers,MissyDubourde,ZoeIngstrom,DarrinWilliams,OxBellows,HeatherGranville,JennyLeclerc,FatherRhinehardt,ProfessorLongfellow,MadameZostra,VivianLopez
 """
-characterlist=[peterAkimoto,brandonJaspers,missyDubourde,zoeIngstrom,darrinWilliams,oxBellows,heatherGranville,jennyLeclerc,fatherRhinehardt,professorLongfellow,madameZostra,vivianLopez]
+
 playerlist=[] #四个游戏角色
 class Choose_interface:#人物角色选择界面 
     def __init__(self):
@@ -1086,17 +884,6 @@ class Downstairs_interface(Basicbackground):
             
             pygame.display.update()
 
-levelnow=1 #目前所处的楼层
-playernow=0 #目前轮到回合的角色
-currentplayerlist=[0,1,2,3] #现存角色列表
-deathlist=[] #死亡角色列表
-levellist=[]
-downstairs_interface=Downstairs_interface()
-levellist.append(downstairs_interface)
-ground_interface=Ground_interface()
-levellist.append(ground_interface)
-upstairs_interface=Upstairs_interface()
-levellist.append(upstairs_interface)
 
 class helpdocument:
     def __init__(self):
@@ -1122,24 +909,16 @@ class helpdocument:
         screen.mainloop()
 start_interface=Start_interface()
 start_interface.run()
-"""
-def Rolldice(self,center_x,center_y):   #一次掷骰子
-        self.images=[]
-        self.index=random.randint(0,2)
-        for num in range(3):
-            img=Image(f"dice{num}.jpeg",0.4)
-            self.images.append(img)
-        self.frame=150 #骰子动画屏幕停留时间ms
-        count=0
-        while True:
-            self.images[self.index].draw(self.display_surface,center_x,center_y)
-            pygame.display.update()
-            if count==10:break #随机切换骰子图片10次掷骰结束
-            self.changeindex=random.randint(0,2)
-            while self.index==self.changeindex:
-                self.changeindex=random.randint(0,2)
-            self.index=self.changeindex
-            pygame.time.delay(self.frame)
-            count+=1
-        return self.index #返回最终显示图片的骰子点数"""
 
+global currentplayerlist, deathlist, levelnow, playernow, levellist
+currentplayerlist = [0, 1, 2, 3]
+deathlist = []
+levelnow = 1
+playernow = 0
+levellist = []
+downstairs_interface = Downstairs_interface()
+levellist.append(downstairs_interface)
+ground_interface = Ground_interface()
+levellist.append(ground_interface)
+upstairs_interface = Upstairs_interface()
+levellist.append(upstairs_interface)

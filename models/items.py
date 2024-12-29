@@ -1,6 +1,6 @@
 import pygame
 import random
-from Image import Image
+from models.graphics import Image
 
 class Items:
     def __init__(self, name, description, effect, image, discard_after_use, can_be_stolen):
