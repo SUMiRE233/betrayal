@@ -1,5 +1,5 @@
 import pygame
-from core.performs import Start_interface, Downstairs_interface, Ground_interface, Upstairs_interface
+from core.performs import Start_interface
 from config.config import levellist
 
 def main():
