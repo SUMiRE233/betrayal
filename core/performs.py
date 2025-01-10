@@ -1,12 +1,18 @@
 import pygame
 import random
 import tkinter as tk
+from tkinter import ttk
+from PIL import Image as PILImage, ImageTk
+#from PIL import Resampling
 import models.items
+import models.room
+import models.events
 from models.events import Eventlist, Eventfunclist
 from models.omens import Omenlist, Omenfunclist
 from models.graphics import Image, Button, ButtonText, color, Text
-from config.config import levellist, levelnow, playernow, deathlist
+from config.config import levellist, levelnow, playernow, deathlist,playerlist
 
+totalomen = 0
 
 class Commoncharacter:
     def __init__(self):
@@ -78,13 +84,86 @@ class Commoncharacter:
             enemy.attributechange(numenemy-numself,"strength")
         elif numself<numenemy:
             self.attributechange(numself-numenemy,"strength")
-    """
-    def move(self,direction):#人物移动
+    
+    def move(character,direction):#人物移动
         if direction==0:
+            if (character.pos.open_to[direction] == 0) or (character.position[1]-1 < 0): 
+                print("撞到墙了")
+                return
+            else:
+                character.position[1] = character.position[1] - 1
+                if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
+                    models.room.open_new_room(character,direction)
+                    print("has openned a newroom!")
+                elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
+                    print("撞到墙了")
+                    character.position[2] = character.position[1] + 1
+                    return
+                else:
+                    character.pos = character.pos.connect_room[direction]
             
+                print(character.pos.name)
+                print("has moved!")
         elif direction==1:
+            if (character.pos.open_to[direction] == 0) or (character.position[2]+1 >= 5):  
+                print("撞到墙了")
+                return
+            else:
+                character.position[2] = character.position[2] + 1
+                if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
+                    models.room.open_new_room(character,direction)
+                    print("has openned a newroom!")
+                elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
+                    print("撞到墙了")
+                    character.position[2] = character.position[2] - 1
+                    return
+                else:
+                    character.pos = character.pos.connect_room[direction]
+                
+                print(character.pos.name)
+                print("has moved!")
         elif direction==2:
-        else:
+            if (character.pos.open_to[direction] == 0) or (character.position[1]+1 >= 4): 
+                print("撞到墙了")
+                return
+            else:
+                character.position[1] = character.position[1] + 1
+                if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
+                    models.room.open_new_room(character,direction)
+                    print("has openned a newroom!")
+                elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
+                    print("撞到墙了")
+                    character.position[1] = character.position[1] - 1
+                    return
+                else:
+                    character.pos = character.pos.connect_room[direction]
+                print(character.pos.name)
+                print("has moved!")
+        elif direction == 3:
+            if (character.pos.open_to[direction] == 0) or (character.position[2]-1 < 0 ): 
+                print("撞到墙了")
+                return
+            else:
+                character.position[2] = character.position[2] - 1
+                if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
+                    models.room.open_new_room(character,direction)
+                    print("has openned a newroom!")
+                elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
+                    print("撞到墙了")
+                    character.position[2] = character.position[2] + 1
+                    return
+                else:
+                    character.pos = character.pos.connect_room[direction]
+                print(character.pos.name)
+                print("has moved!")
+        elif direction == 4:
+            if(character.pos.connect_room[direction] == 0):
+                return
+            character.position = models.room.find_element(models.room.map,character.pos.connect_room[direction])
+            character.pos = character.pos.connect_room[direction]
+            print(character.pos.name)
+            print("has moved!")
+    """
     def checkbag(self): #查看人物背包中的预兆物品牌
     def show(self):
     
@@ -93,17 +172,19 @@ class Commoncharacter:
     def getcards(self,type): #抽取卡牌 type:卡牌类型
         if type=="omen":
             global totalomen
-            totalomen+=1
+            totalomen += 1
             num=random.randint(0,len(Omenlist)-1)
             self.bag.append(Omenlist[num])
             if num<6:
                 Omenfunclist[num](self,self)
             #else:Omenfunclist[num](self,self)
             self.revealtruth()
+            print("has omen")
         if type=="event":
             num=2
             #num=random.randint(0,len(Eventlist)-1)
             Eventfunclist[num](self,self)
+            print("has event")
         if type=="item":
             if len(models.items.item) == 0:
                 print("没有可获取的物品！")
@@ -113,6 +194,7 @@ class Commoncharacter:
             if get_item == models.items.amulet_item:
                 models.items.amulet(self)
             models.items.item.remove(get_item)
+            print("has gain a item")
         #if type=="room":
         
             
@@ -196,7 +278,7 @@ class Commoncharacter:
             startscript=1
             return True
         return False
-    
+  
 class ProfessorLongfellow(Commoncharacter):
     def __init__(self):
         super().__init__()
@@ -214,8 +296,8 @@ class ProfessorLongfellow(Commoncharacter):
         self.knowledge=self.knowledgelist[self.knowledge_pos]
         self.image=Image(r"图片\人物五边形\ProfessorLongfellow.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\ProfessorLongfellowcircle.png",0.2)
-        
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 professorLongfellow=ProfessorLongfellow()
 
 
@@ -237,8 +319,9 @@ class ZoeIngstrom(Commoncharacter):
         self.knowledge=self.knowledgelist[self.knowledge_pos]
         self.image=Image(r"图片\人物五边形\ZoeIngstrom.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\ZoeIngstromcircle.png",0.2)
-       
-      #  self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
+
 zoeIngstrom=ZoeIngstrom()
 class HeatherGranville(Commoncharacter):
     def __init__(self):
@@ -257,8 +340,9 @@ class HeatherGranville(Commoncharacter):
         self.knowledge=self.knowledgelist[self.knowledge_pos]
         self.image=Image(r"图片\人物五边形\HeatherGranville.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\HeatherGranvillecircle.png",0.2)
-    
-      #  self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
+
 heatherGranville=HeatherGranville()
 class BrandonJaspers(Commoncharacter):
     def __init__(self):
@@ -277,8 +361,9 @@ class BrandonJaspers(Commoncharacter):
         self.knowledge=self.knowledgelist[self.knowledge_pos]
         self.image=Image(r"图片\人物五边形\BrandonJaspers.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\BrandonJasperscircle.png",0.2)
-      
-      #  self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
+
 brandonJaspers=BrandonJaspers()
 class DarrinWilliams(Commoncharacter):
     def __init__(self):
@@ -297,8 +382,9 @@ class DarrinWilliams(Commoncharacter):
         self.knowledge=self.knowledgelist[self.knowledge_pos]
         self.image=Image(r"图片\人物五边形\DarrinWilliams.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\DarrinWilliamscircle.png",0.2)
-       
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
+
 darrinWilliams=DarrinWilliams()
 class MadameZostra(Commoncharacter):
     def __init__(self):
@@ -318,7 +404,8 @@ class MadameZostra(Commoncharacter):
         self.image=Image(r"图片\人物五边形\MadameZostra.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\MadameZostracircle.png",0.2)
        
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 madameZostra=MadameZostra()
 class MissyDubourde(Commoncharacter):
     def __init__(self):
@@ -338,7 +425,8 @@ class MissyDubourde(Commoncharacter):
         self.image=Image(r"图片\人物五边形\MissyDubourde.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\MissyDubourdecircle.png",0.2)
         
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 missyDubourde=MissyDubourde()
 class JennyLeclerc(Commoncharacter):
     def __init__(self):
@@ -358,7 +446,8 @@ class JennyLeclerc(Commoncharacter):
         self.image=Image(r"图片\人物五边形\JennyLeclerc.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\JennyLeclerccircle.png",0.2)
       
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 jennyLeclerc=JennyLeclerc()
 class FatherRhinehardt(Commoncharacter):
     def __init__(self):
@@ -378,7 +467,8 @@ class FatherRhinehardt(Commoncharacter):
         self.image=Image(r"图片\人物五边形\FatherRhinehardt.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\FatherRhinehardtcircle.png",0.2)
         
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 fatherRhinehardt=FatherRhinehardt()
 class PeterAkimoto(Commoncharacter):
     def __init__(self):
@@ -398,7 +488,8 @@ class PeterAkimoto(Commoncharacter):
         self.image=Image(r"图片\人物五边形\PeterAkimoto.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\PeterAkimotocircle.png",0.2)
       
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 peterAkimoto=PeterAkimoto()
 
 class OxBellows(Commoncharacter):
@@ -419,7 +510,8 @@ class OxBellows(Commoncharacter):
         self.image=Image(r"图片\人物五边形\OxBellows.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\OxBellowscircle.png",0.2)
       
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 oxBellows=OxBellows()
 class VivianLopez(Commoncharacter):
     def __init__(self):
@@ -439,7 +531,8 @@ class VivianLopez(Commoncharacter):
         self.image=Image(r"图片\人物五边形\VivianLopez.png",0.2)
         self.circleimage=Image(r"图片\人物圆形标记\VivianLopezcircle.png",0.2)
         
-       # self.pos=
+        self.pos = models.room.Entrancehall
+        self.position = [1,0,2]
 vivianLopez=VivianLopez()
 
 characterlist=[peterAkimoto,brandonJaspers,missyDubourde,zoeIngstrom,darrinWilliams,oxBellows,heatherGranville,jennyLeclerc,fatherRhinehardt,professorLongfellow,madameZostra,vivianLopez]
@@ -460,7 +553,7 @@ class Start_interface:
         self.display_surface=pygame.display.set_mode((self.WINDOW_WIDTH,self.WINDOW_HEIGHT))
         self.display_surface.fill(color.WHITE)
         pygame.display.set_caption("山中小屋")
-        self.background_image = pygame.image.load(r"C:\Users\SUMiRE\Desktop\betrayal\图片\山中小屋背景.jpg")
+        self.background_image = pygame.image.load(r"图片/山中小屋背景.jpg")
         self.display_surface.blit(self.background_image, (0, 0))
         self.buttonstart=ButtonText("start",color.BLACK,"HYJinShi-95W.ttf",50)
         self.buttonstart.draw(self.display_surface,400,600)
@@ -489,14 +582,13 @@ class Start_interface:
 PeterAkimoto,BrandonJaspers,MissyDubourde,ZoeIngstrom,DarrinWilliams,OxBellows,HeatherGranville,JennyLeclerc,FatherRhinehardt,ProfessorLongfellow,MadameZostra,VivianLopez
 """
 
-playerlist=[] #四个游戏角色
 class Choose_interface:#人物角色选择界面 
     def __init__(self):
         pygame.init()
         self.WINDOW_WIDTH=1200
         self.WINDOW_HEIGHT=900
         self.display_surface=pygame.display.set_mode((self.WINDOW_WIDTH,self.WINDOW_HEIGHT))
-        self.background_image = pygame.image.load(r"C:\Users\SUMiRE\Desktop\betrayal\图片\山中小屋背景.jpg")
+        self.background_image = pygame.image.load(r"图片/山中小屋背景.jpg")
         self.display_surface.blit(self.background_image, (0, 0))
         pygame.display.set_caption("人物角色选择")
         self.text=Text("请选择四个角色",color.WHITE,"HYJinShi-95W.ttf",50)
@@ -612,29 +704,221 @@ class Ground_interface(Basicbackground):
         pygame.init()
         super().__init__()
     def run(self):
-        global levelnow #将现在所处楼层设为地面
-        levelnow=1
+        global levelnow
+        levelnow = 1
+        self.running = True
+        super().Draw()
+        self.groundbutton = ButtonText("地面", color.RED, "HYJinShi-95W.ttf", 30)
+        self.groundbutton.draw(self.display_surface, 600, 40)
+        self.roomlist = [[0 for i in range(5)] for j in range(4)]
+        playerlist[0].getcards("item")
+
+
+        while self.running:
+            for i in range(4):
+                for j in range(5):
+                    if models.room.map[1][i][j] == 0:
+                        continue
+                    else:
+                        models.room.map[1][i][j].image.draw(self.display_surface, 250 + j * 175, 150 + i * 175)
+            for i in range(4):
+                if playerlist[i].position[0] == 1:
+                    if i == 0:
+                        a = 1
+                        b = 0
+                    elif i == 1:
+                        a = 0
+                        b = 1
+                    elif i == 2:
+                        a = -1
+                        b = 0
+                    elif i == 3:
+                        a = 0
+                        b = -1
+                    playerlist[i].circleimage.draw(self.display_surface, playerlist[i].position[2] * 175 + 250 + a * 30,
+                                                   playerlist[i].position[1] * 175 + 150 + b * 30)
+            for i in deathlist:
+                playerlist[deathlist[i]].deathtext.draw(self.display_surface, self.playerimagepos[deathlist[i]][0],
+                                                       self.playerimagepos[deathlist[i]][1])
+            for event in pygame.event.get():
+                if event.type == CHANGEATTRIBUTE:
+                    if event.message == "strength":
+                        for i in range(4):
+                            playerlist[i].textstrength = Text("力量：%d" % playerlist[i].strength, color.WHITE,
+                                                              "HYJinShi-95W.ttf", 15)
+                            pygame.draw.rect(self.display_surface, self.background_color,
+                                             (self.playertextpos[i][0] - self.width / 2,
+                                              self.playertextpos[i][1] - self.height / 2, self.width, self.height))
+                            playerlist[i].textstrength.draw(self.display_surface, self.playertextpos[i][0],
+                                                            self.playertextpos[i][1])
+                    elif event.message == "speed":
+                        for i in range(4):
+                            playerlist[i].textspeed = Text("速度：%d" % playerlist[i].speed, color.WHITE,
+                                                           "HYJinShi-95W.ttf", 15)
+                            pygame.draw.rect(self.display_surface, self.background_color,
+                                             (self.playertextpos[i][0] - self.width / 2,
+                                              self.playertextpos[i][1] + 16 - self.height / 2, self.width, self.height))
+                            playerlist[i].textspeed.draw(self.display_surface, self.playertextpos[i][0],
+                                                         self.playertextpos[i][1] + 16)
+                    elif event.message == "mind":
+                        for i in range(4):
+                            playerlist[i].textmind = Text("神志：%d" % playerlist[i].mind, color.WHITE,
+                                                          "HYJinShi-95W.ttf", 15)
+                            pygame.draw.rect(self.display_surface, self.background_color,
+                                             (self.playertextpos[i][0] - self.width / 2,
+                                              self.playertextpos[i][1] + 32 - self.height / 2, self.width, self.height))
+                            playerlist[i].textmind.draw(self.display_surface, self.playertextpos[i][0],
+                                                        self.playertextpos[i][1] + 32)
+                    else:
+                        for i in range(4):
+                            playerlist[i].textknowledge = Text("知识：%d" % playerlist[i].knowledge, color.WHITE,
+                                                               "HYJinShi-95W.ttf", 15)
+                            pygame.draw.rect(self.display_surface, self.background_color,
+                                             (self.playertextpos[i][0] - self.width / 2,
+                                              self.playertextpos[i][1] + 48 - self.height / 2, self.width, self.height))
+                            playerlist[i].textknowledge.draw(self.display_surface, self.playertextpos[i][0],
+                                                             self.playertextpos[i][1] + 48)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    for i in range(4):
+                        if playerlist[i].textbag.handle_event():
+                            bag = tk.Tk()
+                            bag.geometry('600x1200')
+                            bag.title(f"玩家{i}的背包")
+
+                            x, y = 20, 20
+                            item_width = 600
+                            item_height = 1200
+                            photolist = []
+                            labellist = []
+                            for thing in playerlist[i].bag:
+                                if isinstance(thing, models.items.Items):
+                                    try:
+                                        img = PILImage.open(thing.image.img_name)
+                                        img = img.resize(item_width, item_height)
+                                        photo = ImageTk.PhotoImage(img)
+                                        photolist.append(photo)
+                                        
+                                        label = tk.Label(bag, image=photo)
+                                        label.image = photo
+                                        label.place(x=x, y=y)
+                                        labellist.append(label)
+                                    except:
+                                        pass
+                            bag.mainloop()
+                    for i in range(len(playerlist[playernow].hurtbuttonlist)):
+                        if playerlist[playernow].hurtbuttonlist[i].handle_event():
+                            for j in range(len(playerlist[playernow].hurtbuttonlist)):
+                                pygame.draw.rect(self.display_surface, self.background_color,
+                                                 (self.hurttypepos[playernow][0] - self.hurtwidth / 2,
+                                                  self.hurttypepos[playernow][1] - self.hurtheight / 2 + j * 25,
+                                                  self.hurtwidth, self.hurtheight))
+                            if playerlist[playernow].testtype == "body":
+                                playerlist[playernow].attributechange(-i, "strength")
+                                playerlist[playernow].attributechange(i - len(playerlist[playernow].hurtbuttonlist) + 1,
+                                                                      "speed")
+                            else:
+                                playerlist[playernow].attributechange(-i, "mind")
+                                playerlist[playernow].attributechange(i - len(playerlist[playernow].hurtbuttonlist) + 1,
+                                                                      "knowledge")
+                            playerlist[playernow].hurtbuttonlist = []
+                            break
+                    for i in range(3):
+                        if self.levelbuttonlist[i].handle_event():
+                            self.running = False
+                            levellist[i].run()
+                    for i in range(4):
+                        for j in range(5):
+                            if self.roomlist[i][j]!= 0:
+                                if self.roomlist[i][j].handle_event():
+                                    if self.roomlist[i][j].scalenow == 0:
+                                        self.roomlist[i][j].scalechange(self.display_surface, self.bigroomscale)
+                                        self.roomlist[i][j].scalenow = 1
+                                    else:
+                                        pygame.draw.rect(self.display_surface, self.background_color,
+                                                         (self.roomlist[i][j].upperleft_x, self.roomlist[i][j].upperleft_y,
+                                                          self.roomlist[i][j].img_width_scaled,
+                                                          self.roomlist[i][j].img_height_scaled))
+                                        self.roomlist[i][j].scalenow = 0
+                                        if (i == 0 and j == 0) or (i == 0 and j == 4) or (i == 3 and j == 0) or (
+                                                i == 3 and j == 4):
+                                            for i in range(4):
+                                                playerlist[i].image.draw(self.display_surface, self.playerimagepos[i][0],
+                                                                         self.playerimagepos[i][1])
+                                        if i == 0:
+                                            for i in range(3):
+                                                self.levelbuttonlist[i].draw(self.display_surface,
+                                                                             self.levelbuttonpos[i][0],
+                                                                             self.levelbuttonpos[i][1])
+                                            self.levelbuttonlist[1] = ButtonText("地面", color.RED, "HYJinShi-95W.ttf", 30)
+                                            self.levelbuttonlist[1].draw(self.display_surface, 600, 40)
+                                        for i in range(4):
+                                            for j in range(5):
+                                                self.room.draw(self.display_surface, self.startpos[0] + j * self.roomlength,
+                                                               self.startpos[1] + i * self.roomlength)
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        print("空格键被按下")
+                        playerlist[0].move(4)
+                    if event.key == pygame.K_RETURN:
+                        print("Enter键被按下")
+                    if event.key == pygame.K_UP:
+                        print("上方向键被按下")
+                        playerlist[0].move(0)
+                    if event.key == pygame.K_DOWN:
+                        print("下方向键被按下")
+                        playerlist[0].move(2)
+                    if event.key == pygame.K_LEFT:
+                        print("左方向键被按下")
+                        playerlist[0].move(3)
+                    if event.key == pygame.K_RIGHT:
+                        print("右方向键被按下")
+                        playerlist[0].move(1)
+                elif event.type == pygame.QUIT:
+                    self.running = False
+            pygame.display.update()
+
+
+        pygame.quit()
+class Upstairs_interface(Basicbackground):
+    def __init__(self):
+        pygame.init()
+        super().__init__()
+    def run(self):
+        global levelnow
+        levelnow=2
         self.running=True
         super().Draw()
-        self.groundbutton=ButtonText("地面",color.RED,"HYJinShi-95W.ttf",30)  #将该楼层的按钮变成红色
-        self.groundbutton.draw(self.display_surface,600,40)
-        self.roomlist=[[0 for i in range(5)] for j in range(4)] #初始化该楼层的房间列表
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("item")
-        
+        self.upstairsbutton=ButtonText("楼上",color.RED,"HYJinShi-95W.ttf",30)
+        self.upstairsbutton.draw(self.display_surface,700,40)
+        self.roomlist=[[0 for i in range(5)] for j in range(4)]
         while self.running:
-            for i in deathlist:  #在死亡列表中的角色绘制“人物已死亡”
+            for i in range(4):
+                for j in range(5):
+                    if models.room.map[2][i][j] == 0:
+                        continue
+                    else:
+                        models.room.map[2][i][j].image.draw(self.display_surface,250+j*175,150+i*175)
+            for i in range(4):
+                if playerlist[i].position[0] == 2:
+                    if i == 0:
+                        a = 1
+                        b = 0
+                    elif i == 1: 
+                        a = 0
+                        b = 1
+                    elif i == 2:
+                        a = -1
+                        b = 0
+                    elif i == 3: 
+                        a = 0
+                        b = -1
+                    playerlist[i].circleimage.draw(self.display_surface,playerlist[i].position[2]*175+250+a*30,playerlist[i].position[1]*175+150+b*30)
+            for i in deathlist:
                 playerlist[deathlist[i]].deathtext.draw(self.display_surface,self.playerimagepos[deathlist[i]][0],self.playerimagepos[deathlist[i]][1])
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running=False
+               
                 if event.type == CHANGEATTRIBUTE:#检测到有角色属性变化，更新相应文本
                     if event.message=="strength":
                         for i in range(4):
@@ -656,15 +940,12 @@ class Ground_interface(Basicbackground):
                             playerlist[i].textknowledge=Text("知识：%d"%playerlist[i].knowledge,color.WHITE,"HYJinShi-95W.ttf",15)
                             pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]+48-self.height/2,self.width,self.height))
                             playerlist[i].textknowledge.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+48)
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    """#检测用户选择属性按钮是否被按下
+                if event.type == pygame.MOUSEBUTTONDOWN:
                     for i in range(4):
-                        if playerlist[i].strengthbutton.handle_event():"""
-                
-                    for i in range(len(playerlist[playernow].hurtbuttonlist)): #选择肉体精神损伤分配情况
+                        if playerlist[i].textbag.handle_event():
+                            print(f"玩家{i}的背包按钮被点击")
+                    for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
-                            for j in range(len(playerlist[playernow].hurtbuttonlist)):
-                                pygame.draw.rect(self.display_surface, self.background_color,(self.hurttypepos[playernow][0]-self.hurtwidth/2,self.hurttypepos[playernow][1]-self.hurtheight/2+j*25,self.hurtwidth,self.hurtheight))
                             if playerlist[playernow].testtype=="body":
                                 playerlist[playernow].attributechange(-i,"strength")
                                 playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"speed")
@@ -673,11 +954,10 @@ class Ground_interface(Basicbackground):
                                 playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"knowledge")
                             playerlist[playernow].hurtbuttonlist=[]
                             break
-                    for i in range(3): #检测选择楼层的按钮是否被按下
+                    for i in range(3):
                         if self.levelbuttonlist[i].handle_event():
                             self.running=False
                             levellist[i].run()
-
                     for i in range(4): #点击房间图片就放大缩小房间
                         for j in range(5):
                             if self.roomlist[i][j]!=0:
@@ -699,112 +979,32 @@ class Ground_interface(Basicbackground):
                                         for i in range(4): 
                                             for j in range(5):
                                                 self.room.draw(self.display_surface,self.startpos[0]+j*self.roomlength,self.startpos[1]+i*self.roomlength)
-                        
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:  # 检测到空格键被按下
                         print("空格键被按下")
+                        playerlist[0].move(4)
                     if event.key == pygame.K_RETURN:
                         print("Enter键被按下")
 
                         # 检测上下左右方向键
                     if event.key == pygame.K_UP:
                         print("上方向键被按下")
+                        playerlist[0].move(0)
                            
                     if event.key == pygame.K_DOWN:
                         print("下方向键被按下")
+                        playerlist[0].move(2)
                             
                     if event.key == pygame.K_LEFT:
                         print("左方向键被按下")
+                        playerlist[0].move(3)
                            
                     if event.key == pygame.K_RIGHT:
-                        print("右方向键被按下")       
+                        print("右方向键被按下") 
+                        playerlist[0].move(1)      
                 elif event.type == pygame.QUIT:
                     self.running=False
-            pygame.display.update()
-
-                
-                        
-                  
-                         
-        pygame.quit()
-class Upstairs_interface(Basicbackground):
-    def __init__(self):
-        pygame.init()
-        super().__init__()
-    def run(self):
-        global levelnow
-        levelnow=2
-        self.running=True
-        super().Draw()
-        self.upstairsbutton=ButtonText("楼上",color.RED,"HYJinShi-95W.ttf",30)
-        self.upstairsbutton.draw(self.display_surface,700,40)
-        self.roomlist=[[0 for i in range(5)] for j in range(4)]
-        while self.running:
-            for i in deathlist:
-                playerlist[deathlist[i]].deathtext.draw(self.display_surface,self.playerimagepos[deathlist[i]][0],self.playerimagepos[deathlist[i]][1])
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running=False
-               
-                if event.type == CHANGEATTRIBUTE:#检测到有角色属性变化，更新相应文本
-                    if event.message=="strength":
-                        for i in range(4):
-                            playerlist[i].textstrength=Text("力量：%d"%playerlist[i].strength,color.WHITE,"HYJinShi-95W.ttf",15)
-                            pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]-self.height/2,self.width,self.height))
-                            playerlist[i].textstrength.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1])
-                    elif event.message=="speed":
-                        for i in range(4):
-                            playerlist[i].textspeed=Text("速度：%d"%playerlist[i].speed,color.WHITE,"HYJinShi-95W.ttf",15)
-                            pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]+16-self.height/2,self.width,self.height))
-                            playerlist[i].textspeed.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+16)
-                    elif event.message=="mind":
-                        for i in range(4):
-                            playerlist[i].textmind=Text("神志：%d"%playerlist[i].mind,color.WHITE,"HYJinShi-95W.ttf",15)
-                            pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]+32-self.height/2,self.width,self.height))
-                            playerlist[i].textmind.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+32)
-                    else:
-                        for i in range(4):
-                            playerlist[i].textknowledge=Text("知识：%d"%playerlist[i].knowledge,color.WHITE,"HYJinShi-95W.ttf",15)
-                            pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]+48-self.height/2,self.width,self.height))
-                            playerlist[i].textknowledge.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+48)
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    for i in range(len(playerlist[playernow].hurtbuttonlist)):
-                        if playerlist[playernow].hurtbuttonlist[i].handle_event():
-                            if playerlist[playernow].testtype=="body":
-                                playerlist[playernow].attributechange(-i,"strength")
-                                playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"speed")
-                            else:
-                                playerlist[playernow].attributechange(-i,"mind")
-                                playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"knowledge")
-                            playerlist[playernow].hurtbuttonlist=[]
-                            break
-                    for i in range(3):
-                        if self.levelbuttonlist[i].handle_event():
-                            self.running=False
-                            levellist[i].run()
-                    for i in range(4):
-                        for j in range(5):
-                            if self.roomlist[i][j]!=0:
-                                if self.roomlist[i][j].handle_event():
-                                    if self.roomlist[i][j].scalenow==0:
-                                        self.roomlist[i][j].scalechange(self.display_surface,self.bigroomscale)
-                                        self.roomlist[i][j].scalenow=1
-                                    else:
-                                        pygame.draw.rect(self.display_surface, self.background_color,(self.roomlist[i][j].upperleft_x, self.roomlist[i][j].upperleft_y, self.roomlist[i][j].img_width_scaled, self.roomlist[i][j].img_height_scaled))
-                                        self.roomlist[i][j].scalenow=0
-                                        if (i==0 and j==0) or (i==0 and j==4) or(i==3 and j==0) or (i==3 and j==4):
-                                            for i in range(4):
-                                                playerlist[i].image.draw(self.display_surface,self.playerimagepos[i][0],self.playerimagepos[i][1])
-                                        if i==0:
-                                            for i in range(3):
-                                                self.levelbuttonlist[i].draw(self.display_surface,self.levelbuttonpos[i][0],self.levelbuttonpos[i][1])
-                                            self.levelbuttonlist[1]=ButtonText("地面",color.RED,"HYJinShi-95W.ttf",30)
-                                            self.levelbuttonlist[1].draw(self.display_surface,600,40)
-                                        for i in range(4): 
-                                            for j in range(5):
-                                                self.room.draw(self.display_surface,self.startpos[0]+j*self.roomlength,self.startpos[1]+i*self.roomlength)
-                    
-                    
+            
                         
             
             pygame.display.update()
@@ -821,6 +1021,27 @@ class Downstairs_interface(Basicbackground):
         self.downstairsbutton.draw(self.display_surface,500,40)
         self.roomlist=[[0 for i in range(5)] for j in range(4)]
         while self.running:
+            for i in range(4):
+                for j in range(5):
+                    if models.room.map[0][i][j] == 0:
+                        continue
+                    else:
+                        models.room.map[0][i][j].image.draw(self.display_surface,250+j*175,150+i*175)
+            for i in range(4):
+                if playerlist[i].position[0] == 0:
+                    if i == 0:
+                        a = 1
+                        b = 0
+                    elif i == 1: 
+                        a = 0
+                        b = 1
+                    elif i == 2:
+                        a = -1
+                        b = 0
+                    elif i == 3: 
+                        a = 0
+                        b = -1
+                    playerlist[i].circleimage.draw(self.display_surface,playerlist[i].position[2]*175+250+a*30,playerlist[i].position[1]*175+150+b*30)
             for i in deathlist:
                 playerlist[deathlist[i]].deathtext.draw(self.display_surface,self.playerimagepos[deathlist[i]][0],self.playerimagepos[deathlist[i]][1])
             for event in pygame.event.get():
@@ -849,6 +1070,9 @@ class Downstairs_interface(Basicbackground):
                             pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]+48-self.height/2,self.width,self.height))
                             playerlist[i].textknowledge.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+48)
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    for i in range(4):
+                        if playerlist[i].textbag.handle_event():
+                            print(f"玩家{i}的背包按钮被点击")
                     for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
                             if playerlist[playernow].testtype=="body":
@@ -863,7 +1087,7 @@ class Downstairs_interface(Basicbackground):
                         if self.levelbuttonlist[i].handle_event():
                             self.running=False
                             levellist[i].run()
-                    for i in range(4):
+                    for i in range(4): #点击房间图片就放大缩小房间
                         for j in range(5):
                             if self.roomlist[i][j]!=0:
                                 if self.roomlist[i][j].handle_event():
@@ -885,7 +1109,32 @@ class Downstairs_interface(Basicbackground):
                                             for j in range(5):
                                                 self.room.draw(self.display_surface,self.startpos[0]+j*self.roomlength,self.startpos[1]+i*self.roomlength)
                     
-                    
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:  # 检测到空格键被按下
+                        print("空格键被按下")
+                        playerlist[0].move(4)
+                    if event.key == pygame.K_RETURN:
+                        print("Enter键被按下")
+
+                        # 检测上下左右方向键
+                    if event.key == pygame.K_UP:
+                        print("上方向键被按下")
+                        playerlist[0].move(0)
+                           
+                    if event.key == pygame.K_DOWN:
+                        print("下方向键被按下")
+                        playerlist[0].move(2)
+                            
+                    if event.key == pygame.K_LEFT:
+                        print("左方向键被按下")
+                        playerlist[0].move(3)
+                           
+                    if event.key == pygame.K_RIGHT:
+                        print("右方向键被按下") 
+                        playerlist[0].move(1)      
+                elif event.type == pygame.QUIT:
+                    self.running=False
+               
                         
             
             pygame.display.update()

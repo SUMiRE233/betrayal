@@ -3,3 +3,6 @@ deathlist = []
 levelnow = 1
 playernow = 0
 levellist = []
+playerlist=[] 
+startscript=0
+totalomen=0

@@ -1,5 +1,3 @@
-startscript=0 #是否已经作祟
-totalomen=0 #统计目前预兆个数
 Omenlist=[]
 Omenfunclist=[]
 class Bookomen:
