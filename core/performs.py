@@ -712,6 +712,7 @@ class Ground_interface(Basicbackground):
         self.groundbutton.draw(self.display_surface, 600, 40)
         self.roomlist = [[0 for i in range(5)] for j in range(4)]
         playerlist[0].getcards("item")
+        playerlist[0].getcards("omen")
 
 
         while self.running:
@@ -783,7 +784,7 @@ class Ground_interface(Basicbackground):
                         x, y = 20, 20
                         if playerlist[i].textbag.handle_event():
                             bag = tk.Tk()
-                            bag.geometry('1200x600')
+                            bag.geometry('1600x600')
                             bag.title(f"玩家{i}的背包")
                             
                             item_width = 250
@@ -805,6 +806,21 @@ class Ground_interface(Basicbackground):
                                         x += 250
                                     except:
                                         pass
+                                else:
+                                    try:
+                                        img = PILImage.open(thing.image.img_name)
+                                        img = img.resize((item_width, item_height))
+                                        photo = ImageTk.PhotoImage(img)
+                                        photolist.append(photo)
+                                        
+                                        label = tk.Label(bag, image=photo)
+                                        label.image = photo
+                                        label.place(x=x, y=y)
+                                        labellist.append(label)
+                                        x += 250
+                                    except:
+                                        pass
+                                        
                             bag.mainloop()
                     for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
@@ -941,10 +957,49 @@ class Upstairs_interface(Basicbackground):
                             playerlist[i].textknowledge=Text("知识：%d"%playerlist[i].knowledge,color.WHITE,"HYJinShi-95W.ttf",15)
                             pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]+48-self.height/2,self.width,self.height))
                             playerlist[i].textknowledge.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+48)
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     for i in range(4):
+                        x, y = 20, 20
                         if playerlist[i].textbag.handle_event():
-                            print(f"玩家{i}的背包按钮被点击")
+                            bag = tk.Tk()
+                            bag.geometry('1600x600')
+                            bag.title(f"玩家{i}的背包")
+                            
+                            item_width = 250
+                            item_height = 500
+                            photolist = []
+                            labellist = []
+                            for thing in playerlist[i].bag:
+                                if isinstance(thing, models.items.Items):
+                                    try:
+                                        img = PILImage.open(thing.image.img_name)
+                                        img = img.resize((item_width, item_height))
+                                        photo = ImageTk.PhotoImage(img)
+                                        photolist.append(photo)
+                                        
+                                        label = tk.Label(bag, image=photo)
+                                        label.image = photo
+                                        label.place(x=x, y=y)
+                                        labellist.append(label)
+                                        x += 250
+                                    except:
+                                        pass
+                                else:
+                                    try:
+                                        img = PILImage.open(thing.image.img_name)
+                                        img = img.resize((item_width, item_height))
+                                        photo = ImageTk.PhotoImage(img)
+                                        photolist.append(photo)
+                                        
+                                        label = tk.Label(bag, image=photo)
+                                        label.image = photo
+                                        label.place(x=x, y=y)
+                                        labellist.append(label)
+                                        x += 250
+                                    except:
+                                        pass
+                                        
+                            bag.mainloop()
                     for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
                             if playerlist[playernow].testtype=="body":
@@ -1070,10 +1125,49 @@ class Downstairs_interface(Basicbackground):
                             playerlist[i].textknowledge=Text("知识：%d"%playerlist[i].knowledge,color.WHITE,"HYJinShi-95W.ttf",15)
                             pygame.draw.rect(self.display_surface, self.background_color,(self.playertextpos[i][0]-self.width/2,self.playertextpos[i][1]+48-self.height/2,self.width,self.height))
                             playerlist[i].textknowledge.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+48)
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     for i in range(4):
+                        x, y = 20, 20
                         if playerlist[i].textbag.handle_event():
-                            print(f"玩家{i}的背包按钮被点击")
+                            bag = tk.Tk()
+                            bag.geometry('1600x600')
+                            bag.title(f"玩家{i}的背包")
+                            
+                            item_width = 250
+                            item_height = 500
+                            photolist = []
+                            labellist = []
+                            for thing in playerlist[i].bag:
+                                if isinstance(thing, models.items.Items):
+                                    try:
+                                        img = PILImage.open(thing.image.img_name)
+                                        img = img.resize((item_width, item_height))
+                                        photo = ImageTk.PhotoImage(img)
+                                        photolist.append(photo)
+                                        
+                                        label = tk.Label(bag, image=photo)
+                                        label.image = photo
+                                        label.place(x=x, y=y)
+                                        labellist.append(label)
+                                        x += 250
+                                    except:
+                                        pass
+                                else:
+                                    try:
+                                        img = PILImage.open(thing.image.img_name)
+                                        img = img.resize((item_width, item_height))
+                                        photo = ImageTk.PhotoImage(img)
+                                        photolist.append(photo)
+                                        
+                                        label = tk.Label(bag, image=photo)
+                                        label.image = photo
+                                        label.place(x=x, y=y)
+                                        labellist.append(label)
+                                        x += 250
+                                    except:
+                                        pass
+                                        
+                            bag.mainloop()
                     for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
                             if playerlist[playernow].testtype=="body":
