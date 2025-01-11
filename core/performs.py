@@ -780,21 +780,21 @@ class Ground_interface(Basicbackground):
                                                              self.playertextpos[i][1] + 48)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for i in range(4):
+                        x, y = 20, 20
                         if playerlist[i].textbag.handle_event():
                             bag = tk.Tk()
-                            bag.geometry('600x1200')
+                            bag.geometry('1200x600')
                             bag.title(f"玩家{i}的背包")
-
-                            x, y = 20, 20
-                            item_width = 600
-                            item_height = 1200
+                            
+                            item_width = 250
+                            item_height = 500
                             photolist = []
                             labellist = []
                             for thing in playerlist[i].bag:
                                 if isinstance(thing, models.items.Items):
                                     try:
                                         img = PILImage.open(thing.image.img_name)
-                                        img = img.resize(item_width, item_height)
+                                        img = img.resize((item_width, item_height))
                                         photo = ImageTk.PhotoImage(img)
                                         photolist.append(photo)
                                         
@@ -802,6 +802,7 @@ class Ground_interface(Basicbackground):
                                         label.image = photo
                                         label.place(x=x, y=y)
                                         labellist.append(label)
+                                        x += 250
                                     except:
                                         pass
                             bag.mainloop()
