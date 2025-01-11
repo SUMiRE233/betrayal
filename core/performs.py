@@ -781,46 +781,60 @@ class Ground_interface(Basicbackground):
                                                              self.playertextpos[i][1] + 48)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for i in range(4):
-                        x, y = 20, 20
+                        x, y = 20, 20  # 初始坐标
                         if playerlist[i].textbag.handle_event():
                             bag = tk.Tk()
                             bag.geometry('1600x600')
                             bag.title(f"玩家{i}的背包")
-                            
-                            item_width = 250
-                            item_height = 500
-                            photolist = []
-                            labellist = []
+
+                            item_width = 250  # 图片宽度
+                            item_height = 500  # 图片高度
+                            photolist = []  # 存储 PhotoImage 对象，防止被垃圾回收
+                            labellist = []  # 存储 Label 对象
+
+                            # 定义点击事件处理函数
+                            def on_image_click(event, thing, player_index, bag_window):
+                                print(f"你点击了: {thing.name}")  # 打印物品名称
+                                try:
+                                    # 调用物品的 effect 方法
+                                    if callable(thing.effect):
+                                        thing.effect(playerlist[player_index])  # 假设 effect 需要玩家对象作为参数
+                                    else:
+                                        print(f"{thing.name} 的 effect 不是可调用方法")
+
+                                    # 如果物品使用后需要丢弃
+                                    if thing.discard_after_use:
+                                        playerlist[player_index].bag.remove(thing)  # 从背包中移除物品
+                                        print(f"{thing.name} 已被移除")
+
+                                    # 关闭当前背包窗口并重新打开，刷新显示
+                                    bag_window.destroy()
+                                    # 重新触发背包打开事件
+                                    pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN))
+                                except Exception as e:
+                                    print(f"执行 {thing.name} 的效果时出错: {e}")
+
                             for thing in playerlist[i].bag:
-                                if isinstance(thing, models.items.Items):
-                                    try:
-                                        img = PILImage.open(thing.image.img_name)
-                                        img = img.resize((item_width, item_height))
-                                        photo = ImageTk.PhotoImage(img)
-                                        photolist.append(photo)
-                                        
-                                        label = tk.Label(bag, image=photo)
-                                        label.image = photo
-                                        label.place(x=x, y=y)
-                                        labellist.append(label)
-                                        x += 250
-                                    except:
-                                        pass
-                                else:
-                                    try:
-                                        img = PILImage.open(thing.image.img_name)
-                                        img = img.resize((item_width, item_height))
-                                        photo = ImageTk.PhotoImage(img)
-                                        photolist.append(photo)
-                                        
-                                        label = tk.Label(bag, image=photo)
-                                        label.image = photo
-                                        label.place(x=x, y=y)
-                                        labellist.append(label)
-                                        x += 250
-                                    except:
-                                        pass
-                                        
+                                try:
+                                    # 加载图片并调整大小
+                                    img = PILImage.open(thing.image.img_name)
+                                    img = img.resize((item_width, item_height))
+                                    photo = ImageTk.PhotoImage(img)
+                                    photolist.append(photo)  # 将 PhotoImage 对象存入列表，防止被垃圾回收
+
+                                    # 创建 Label 并显示图片
+                                    label = tk.Label(bag, image=photo)
+                                    label.image = photo  # 保持引用
+                                    label.place(x=x, y=y)
+
+                                    # 绑定点击事件
+                                    label.bind("<Button-1>", lambda event, thing=thing: on_image_click(event, thing, i, bag))
+
+                                    labellist.append(label)  # 将 Label 对象存入列表
+                                    x += 250  # 更新 x 坐标，放置下一张图片
+                                except Exception as e:
+                                    print(f"加载图片失败: {e}")  # 打印异常信息
+
                             bag.mainloop()
                     for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
@@ -959,46 +973,60 @@ class Upstairs_interface(Basicbackground):
                             playerlist[i].textknowledge.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+48)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for i in range(4):
-                        x, y = 20, 20
+                        x, y = 20, 20  # 初始坐标
                         if playerlist[i].textbag.handle_event():
                             bag = tk.Tk()
                             bag.geometry('1600x600')
                             bag.title(f"玩家{i}的背包")
-                            
-                            item_width = 250
-                            item_height = 500
-                            photolist = []
-                            labellist = []
+
+                            item_width = 250  # 图片宽度
+                            item_height = 500  # 图片高度
+                            photolist = []  # 存储 PhotoImage 对象，防止被垃圾回收
+                            labellist = []  # 存储 Label 对象
+
+                            # 定义点击事件处理函数
+                            def on_image_click(event, thing, player_index, bag_window):
+                                print(f"你点击了: {thing.name}")  # 打印物品名称
+                                try:
+                                    # 调用物品的 effect 方法
+                                    if callable(thing.effect):
+                                        thing.effect(playerlist[player_index])  # 假设 effect 需要玩家对象作为参数
+                                    else:
+                                        print(f"{thing.name} 的 effect 不是可调用方法")
+
+                                    # 如果物品使用后需要丢弃
+                                    if thing.discard_after_use:
+                                        playerlist[player_index].bag.remove(thing)  # 从背包中移除物品
+                                        print(f"{thing.name} 已被移除")
+
+                                    # 关闭当前背包窗口并重新打开，刷新显示
+                                    bag_window.destroy()
+                                    # 重新触发背包打开事件
+                                    pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN))
+                                except Exception as e:
+                                    print(f"执行 {thing.name} 的效果时出错: {e}")
+
                             for thing in playerlist[i].bag:
-                                if isinstance(thing, models.items.Items):
-                                    try:
-                                        img = PILImage.open(thing.image.img_name)
-                                        img = img.resize((item_width, item_height))
-                                        photo = ImageTk.PhotoImage(img)
-                                        photolist.append(photo)
-                                        
-                                        label = tk.Label(bag, image=photo)
-                                        label.image = photo
-                                        label.place(x=x, y=y)
-                                        labellist.append(label)
-                                        x += 250
-                                    except:
-                                        pass
-                                else:
-                                    try:
-                                        img = PILImage.open(thing.image.img_name)
-                                        img = img.resize((item_width, item_height))
-                                        photo = ImageTk.PhotoImage(img)
-                                        photolist.append(photo)
-                                        
-                                        label = tk.Label(bag, image=photo)
-                                        label.image = photo
-                                        label.place(x=x, y=y)
-                                        labellist.append(label)
-                                        x += 250
-                                    except:
-                                        pass
-                                        
+                                try:
+                                    # 加载图片并调整大小
+                                    img = PILImage.open(thing.image.img_name)
+                                    img = img.resize((item_width, item_height))
+                                    photo = ImageTk.PhotoImage(img)
+                                    photolist.append(photo)  # 将 PhotoImage 对象存入列表，防止被垃圾回收
+
+                                    # 创建 Label 并显示图片
+                                    label = tk.Label(bag, image=photo)
+                                    label.image = photo  # 保持引用
+                                    label.place(x=x, y=y)
+
+                                    # 绑定点击事件
+                                    label.bind("<Button-1>", lambda event, thing=thing: on_image_click(event, thing, i, bag))
+
+                                    labellist.append(label)  # 将 Label 对象存入列表
+                                    x += 250  # 更新 x 坐标，放置下一张图片
+                                except Exception as e:
+                                    print(f"加载图片失败: {e}")  # 打印异常信息
+
                             bag.mainloop()
                     for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
@@ -1127,46 +1155,60 @@ class Downstairs_interface(Basicbackground):
                             playerlist[i].textknowledge.draw(self.display_surface,self.playertextpos[i][0],self.playertextpos[i][1]+48)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     for i in range(4):
-                        x, y = 20, 20
+                        x, y = 20, 20  # 初始坐标
                         if playerlist[i].textbag.handle_event():
                             bag = tk.Tk()
                             bag.geometry('1600x600')
                             bag.title(f"玩家{i}的背包")
-                            
-                            item_width = 250
-                            item_height = 500
-                            photolist = []
-                            labellist = []
+
+                            item_width = 250  # 图片宽度
+                            item_height = 500  # 图片高度
+                            photolist = []  # 存储 PhotoImage 对象，防止被垃圾回收
+                            labellist = []  # 存储 Label 对象
+
+                            # 定义点击事件处理函数
+                            def on_image_click(event, thing, player_index, bag_window):
+                                print(f"你点击了: {thing.name}")  # 打印物品名称
+                                try:
+                                    # 调用物品的 effect 方法
+                                    if callable(thing.effect):
+                                        thing.effect(playerlist[player_index])  # 假设 effect 需要玩家对象作为参数
+                                    else:
+                                        print(f"{thing.name} 的 effect 不是可调用方法")
+
+                                    # 如果物品使用后需要丢弃
+                                    if thing.discard_after_use:
+                                        playerlist[player_index].bag.remove(thing)  # 从背包中移除物品
+                                        print(f"{thing.name} 已被移除")
+
+                                    # 关闭当前背包窗口并重新打开，刷新显示
+                                    bag_window.destroy()
+                                    # 重新触发背包打开事件
+                                    pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN))
+                                except Exception as e:
+                                    print(f"执行 {thing.name} 的效果时出错: {e}")
+
                             for thing in playerlist[i].bag:
-                                if isinstance(thing, models.items.Items):
-                                    try:
-                                        img = PILImage.open(thing.image.img_name)
-                                        img = img.resize((item_width, item_height))
-                                        photo = ImageTk.PhotoImage(img)
-                                        photolist.append(photo)
-                                        
-                                        label = tk.Label(bag, image=photo)
-                                        label.image = photo
-                                        label.place(x=x, y=y)
-                                        labellist.append(label)
-                                        x += 250
-                                    except:
-                                        pass
-                                else:
-                                    try:
-                                        img = PILImage.open(thing.image.img_name)
-                                        img = img.resize((item_width, item_height))
-                                        photo = ImageTk.PhotoImage(img)
-                                        photolist.append(photo)
-                                        
-                                        label = tk.Label(bag, image=photo)
-                                        label.image = photo
-                                        label.place(x=x, y=y)
-                                        labellist.append(label)
-                                        x += 250
-                                    except:
-                                        pass
-                                        
+                                try:
+                                    # 加载图片并调整大小
+                                    img = PILImage.open(thing.image.img_name)
+                                    img = img.resize((item_width, item_height))
+                                    photo = ImageTk.PhotoImage(img)
+                                    photolist.append(photo)  # 将 PhotoImage 对象存入列表，防止被垃圾回收
+
+                                    # 创建 Label 并显示图片
+                                    label = tk.Label(bag, image=photo)
+                                    label.image = photo  # 保持引用
+                                    label.place(x=x, y=y)
+
+                                    # 绑定点击事件
+                                    label.bind("<Button-1>", lambda event, thing=thing: on_image_click(event, thing, i, bag))
+
+                                    labellist.append(label)  # 将 Label 对象存入列表
+                                    x += 250  # 更新 x 坐标，放置下一张图片
+                                except Exception as e:
+                                    print(f"加载图片失败: {e}")  # 打印异常信息
+
                             bag.mainloop()
                     for i in range(len(playerlist[playernow].hurtbuttonlist)):
                         if playerlist[playernow].hurtbuttonlist[i].handle_event():
