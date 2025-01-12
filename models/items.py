@@ -1,6 +1,7 @@
 import pygame
 import random
 from models.graphics import Image
+from config.config import playerlist, playernow
 
 class Items:
     def __init__(self, name, description, effect, image, discard_after_use, can_be_stolen):
@@ -117,7 +118,8 @@ def bottle(character):
 
 
 # 黑暗骰子
-def dark_dice(character):
+def dark_dice():
+    character = playerlist[playernow]
     dice_index = 0
     for i in range(3):
         dice_index += character.Rolldice()

@@ -6,3 +6,5 @@ levellist = []
 playerlist=[] 
 startscript=0
 totalomen=0
+traitor=0
+adddice=0

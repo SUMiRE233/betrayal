@@ -100,7 +100,8 @@ class Button(Image):
     def __init__(self, img_name: str, ratio=0.4):
         super().__init__(img_name, ratio)
         self.rect = self.image_scaled.get_rect()
- 
+        self.scalenow = 0
+
     def draw(self, surface: pygame.Surface, center_x, center_y):
         super().draw(surface, center_x, center_y)
         self.rect.center = center_x, center_y

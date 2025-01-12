@@ -1,4 +1,4 @@
-from models.graphics import Image
+from models.graphics import Button
 import pygame
 class room:
     roomlist = []
@@ -13,7 +13,7 @@ class room:
         self.roomlist.append(self)
         self.had_done = 0
         self.obj_name = obj_name
-        self.image = Image(fr"图片\房间\{obj_name}.jpg",0.35)
+        self.image = Button(fr"图片\房间\{obj_name}.jpg",0.35)
         self.connect_room = [0,0,0,0,0]
     def trigger(self,character):
         character.getcards(self.room_type)

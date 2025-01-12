@@ -87,3 +87,5 @@ class Spearomen:
 spear=Spearomen(image = r"图片/预兆/spear.jpg")
 Omenfunclist.append(Spearomen.Spear)
 Omenlist.append(spear)
+
+whetheromenopen=[0 for i in range(len(Omenlist))]

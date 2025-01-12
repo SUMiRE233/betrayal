@@ -7,21 +7,60 @@ from PIL import Image as PILImage, ImageTk
 import models.items
 import models.room
 import models.events
-from models.events import Eventlist, Eventfunclist
-from models.omens import Omenlist, Omenfunclist
+from models.events import Eventlist, Eventfunclist, whethereventopen
+from models.omens import Omenlist, Omenfunclist, whetheromenopen
 from models.graphics import Image, Button, ButtonText, color, Text
-from config.config import levellist, levelnow, playernow, deathlist,playerlist
+from config.config import levellist, levelnow, playernow, deathlist, playerlist, totalomen, currentplayerlist, startscript, traitor, adddice
 
-totalomen = 0
+
 
 class Commoncharacter:
     def __init__(self):
         self.bag=[]
         self.hurtbuttonlist=[]
         
-    def Rolldice(self):   #一次掷骰子
-        num=random.randint(0,2)
-        return num
+    def Rolldice(self):
+        global result_num
+        root = tk.Tk()
+        root.title('骰子')
+
+        jpg_images = [ImageTk.PhotoImage(PILImage.open(f'图片/骰子/dice_{i}.jpg')) for i in range(3)]
+        result_label = tk.Label(root)
+
+        gif = PILImage.open('图片/骰子/dice_0.gif')
+        frames = []
+        try:
+            while True:
+                frames.append(ImageTk.PhotoImage(gif.copy()))
+                gif.seek(len(frames))
+        except EOFError:
+            pass
+
+        play_count = 0
+
+        def update_frame(frame_index):
+            nonlocal play_count
+            global result_num
+            if frame_index < len(frames):
+                gif_label.config(image=frames[frame_index])
+                root.after(50, lambda: update_frame(frame_index + 1))
+            else:
+                if play_count < 1:
+                    play_count += 1
+                    update_frame(0)
+                else:
+                    gif_label.pack_forget()
+                    result_num = random.randint(0, 2)
+                    result_label.config(image=jpg_images[result_num])
+                    result_label.pack()
+
+        gif_label = tk.Label(root)
+        gif_label.pack()
+        update_frame(0)
+
+        root.mainloop()
+        print(result_num)
+        return result_num
     #tkinter制作骰子效果尝试
         """
         dicewindow = tk.Tk()
@@ -77,16 +116,22 @@ class Commoncharacter:
         return sum        
     def attack(self,enemy): #能力攻击 
         numself=self.test("strength")
+        print("自己骰子数%d"%numself)
         numenemy=enemy.test("strength")
-        print(numself)
-        print(numenemy)
+        print("对方骰子数%d"%numenemy)
         if numself>numenemy:
-            enemy.attributechange(numenemy-numself,"strength")
+            enemy.attributechange(numenemy-numself,"body")
         elif numself<numenemy:
-            self.attributechange(numself-numenemy,"strength")
+            self.attributechange(numself-numenemy,"body")
     
     def move(character,direction):#人物移动
+        if character.moved == 1:
+            return
         if direction==0:
+            if character.move_step == character.speed:
+                character.moved = 1
+                return
+            
             if (character.pos.open_to[direction] == 0) or (character.position[1]-1 < 0): 
                 print("撞到墙了")
                 return
@@ -95,16 +140,24 @@ class Commoncharacter:
                 if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
                     models.room.open_new_room(character,direction)
                     print("has openned a newroom!")
+                    character.moved = 1
                 elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
                     print("撞到墙了")
                     character.position[2] = character.position[1] + 1
                     return
                 else:
                     character.pos = character.pos.connect_room[direction]
+                    character.pos.special(character)
+                    character.pos.specialdown(character)
+                    character.move_step = character.move_step + 1
             
                 print(character.pos.name)
                 print("has moved!")
         elif direction==1:
+            if character.move_step == character.speed:
+                character.moved = 1
+                return
+            
             if (character.pos.open_to[direction] == 0) or (character.position[2]+1 >= 5):  
                 print("撞到墙了")
                 return
@@ -113,16 +166,23 @@ class Commoncharacter:
                 if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
                     models.room.open_new_room(character,direction)
                     print("has openned a newroom!")
+                    character.moved = 1
                 elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
                     print("撞到墙了")
                     character.position[2] = character.position[2] - 1
                     return
                 else:
                     character.pos = character.pos.connect_room[direction]
-                
+                    character.pos.special(character)
+                    character.pos.specialdown(character)
+                    character.move_step = character.move_step + 1
                 print(character.pos.name)
                 print("has moved!")
         elif direction==2:
+            if character.move_step == character.speed:
+                character.moved = 1
+                return
+            
             if (character.pos.open_to[direction] == 0) or (character.position[1]+1 >= 4): 
                 print("撞到墙了")
                 return
@@ -131,29 +191,42 @@ class Commoncharacter:
                 if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
                     models.room.open_new_room(character,direction)
                     print("has openned a newroom!")
+                    character.moved = 1
                 elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
                     print("撞到墙了")
                     character.position[1] = character.position[1] - 1
                     return
                 else:
                     character.pos = character.pos.connect_room[direction]
+                    character.pos.special(character)
+                    character.pos.specialdown(character)
+                    character.move_step = character.move_step + 1
                 print(character.pos.name)
                 print("has moved!")
         elif direction == 3:
+            if character.move_step == character.speed:
+                character.moved = 1
+                return
+            
             if (character.pos.open_to[direction] == 0) or (character.position[2]-1 < 0 ): 
                 print("撞到墙了")
+                character.moved = 1
                 return
             else:
                 character.position[2] = character.position[2] - 1
                 if(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] == 0):
                     models.room.open_new_room(character,direction)
                     print("has openned a newroom!")
+                    character.moved = 1
                 elif(character.pos.connect_room[direction] == 0 and models.room.map[character.position[0]][character.position[1]][character.position[2]] != 0):
                     print("撞到墙了")
                     character.position[2] = character.position[2] + 1
                     return
                 else:
                     character.pos = character.pos.connect_room[direction]
+                    character.pos.special(character)
+                    character.pos.specialdown(character)
+                    character.move_step = character.move_step + 1
                 print(character.pos.name)
                 print("has moved!")
         elif direction == 4:
@@ -162,29 +235,49 @@ class Commoncharacter:
             character.position = models.room.find_element(models.room.map,character.pos.connect_room[direction])
             character.pos = character.pos.connect_room[direction]
             print(character.pos.name)
+            character.move_step = character.move_step + 1
             print("has moved!")
-    """
-    def checkbag(self): #查看人物背包中的预兆物品牌
-    def show(self):
-    
-    
-    """
+        elif direction == 5:
+            character.moved = 1
+            return
+        
     def getcards(self,type): #抽取卡牌 type:卡牌类型
         if type=="omen":
             global totalomen
             totalomen += 1
             num=random.randint(0,len(Omenlist)-1)
+            while whetheromenopen[num]==1:
+                num=random.randint(0,len(Omenlist)-1)
+            whetheromenopen[num]=1
             self.bag.append(Omenlist[num])
             if num<6:
                 Omenfunclist[num](self,self)
-            #else:Omenfunclist[num](self,self)
             self.revealtruth()
-            print("has omen")
+        print("has omen")
         if type=="event":
-            num=2
-            #num=random.randint(0,len(Eventlist)-1)
-            Eventfunclist[num](self,self)
+            num=random.randint(0,len(Eventlist)-1)
+            while whethereventopen[num]==1:
+                num=random.randint(0,len(Eventlist)-1)
+            whethereventopen[num]=1
+        #    Eventlist[num].image.draw(levellist[levelnow].display_surface,75,400)
+            
+        #    img = PILImage.open(Eventlist[num].image)
+        #    img = img.resize((500,1000))
+        #    photo = ImageTk.PhotoImage(img)
+        #    photolist = []
+        #    photolist.append(photo)  # 将 PhotoImage 对象存入列表，防止被垃圾回收
+        #    # 创建 Label 并显示图片
+        #    label = tk.Label(bag, image=photo)
+        #    label.image = photo  # 保持引用
+        #    label.place(x=x, y=y)
+        #    labellist = []
+        #    labellist.append(label)  # 将 Label 对象存入列表
+            if num<=14:
+                Eventfunclist[num](self,self)
+            else:
+                Eventfunclist[num](self)
             print("has event")
+            print("触发%s事件"%Eventlist[num].name)
         if type=="item":
             if len(models.items.item) == 0:
                 print("没有可获取的物品！")
@@ -273,9 +366,18 @@ class Commoncharacter:
         sum=0
         for i in range(6):
             sum+=self.Rolldice()
+        print("揭露真相点数%d"%sum)
+        print("现有预兆总数%d"%totalomen)
         if sum<totalomen:
             global startscript
             startscript=1
+            global traitor
+            traitor=playernow
+            for i in currentplayerlist:
+                if i!=playernow:
+                    if playerlist[i].mind>playerlist[traitor].mind:
+                        traitor=i
+            print(traitor)
             return True
         return False
   
@@ -298,6 +400,8 @@ class ProfessorLongfellow(Commoncharacter):
         self.circleimage=Image(r"图片\人物圆形标记\ProfessorLongfellowcircle.png",0.2)
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 professorLongfellow=ProfessorLongfellow()
 
 
@@ -321,7 +425,8 @@ class ZoeIngstrom(Commoncharacter):
         self.circleimage=Image(r"图片\人物圆形标记\ZoeIngstromcircle.png",0.2)
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
-
+        self.moved = 0
+        self.move_step = 0
 zoeIngstrom=ZoeIngstrom()
 class HeatherGranville(Commoncharacter):
     def __init__(self):
@@ -342,6 +447,8 @@ class HeatherGranville(Commoncharacter):
         self.circleimage=Image(r"图片\人物圆形标记\HeatherGranvillecircle.png",0.2)
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 
 heatherGranville=HeatherGranville()
 class BrandonJaspers(Commoncharacter):
@@ -363,6 +470,8 @@ class BrandonJaspers(Commoncharacter):
         self.circleimage=Image(r"图片\人物圆形标记\BrandonJasperscircle.png",0.2)
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 
 brandonJaspers=BrandonJaspers()
 class DarrinWilliams(Commoncharacter):
@@ -384,6 +493,8 @@ class DarrinWilliams(Commoncharacter):
         self.circleimage=Image(r"图片\人物圆形标记\DarrinWilliamscircle.png",0.2)
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 
 darrinWilliams=DarrinWilliams()
 class MadameZostra(Commoncharacter):
@@ -406,6 +517,8 @@ class MadameZostra(Commoncharacter):
        
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 madameZostra=MadameZostra()
 class MissyDubourde(Commoncharacter):
     def __init__(self):
@@ -427,6 +540,8 @@ class MissyDubourde(Commoncharacter):
         
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 missyDubourde=MissyDubourde()
 class JennyLeclerc(Commoncharacter):
     def __init__(self):
@@ -448,6 +563,8 @@ class JennyLeclerc(Commoncharacter):
       
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 jennyLeclerc=JennyLeclerc()
 class FatherRhinehardt(Commoncharacter):
     def __init__(self):
@@ -469,6 +586,8 @@ class FatherRhinehardt(Commoncharacter):
         
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 fatherRhinehardt=FatherRhinehardt()
 class PeterAkimoto(Commoncharacter):
     def __init__(self):
@@ -490,6 +609,8 @@ class PeterAkimoto(Commoncharacter):
       
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 peterAkimoto=PeterAkimoto()
 
 class OxBellows(Commoncharacter):
@@ -512,6 +633,8 @@ class OxBellows(Commoncharacter):
       
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 oxBellows=OxBellows()
 class VivianLopez(Commoncharacter):
     def __init__(self):
@@ -533,6 +656,8 @@ class VivianLopez(Commoncharacter):
         
         self.pos = models.room.Entrancehall
         self.position = [1,0,2]
+        self.moved = 0
+        self.move_step = 0
 vivianLopez=VivianLopez()
 
 characterlist=[peterAkimoto,brandonJaspers,missyDubourde,zoeIngstrom,darrinWilliams,oxBellows,heatherGranville,jennyLeclerc,fatherRhinehardt,professorLongfellow,madameZostra,vivianLopez]
@@ -711,11 +836,78 @@ class Ground_interface(Basicbackground):
         self.groundbutton = ButtonText("地面", color.RED, "HYJinShi-95W.ttf", 30)
         self.groundbutton.draw(self.display_surface, 600, 40)
         self.roomlist = [[0 for i in range(5)] for j in range(4)]
-        playerlist[0].getcards("item")
-        playerlist[0].getcards("omen")
+        
+        
 
 
         while self.running:
+            global playernow
+            if playerlist[playernow].moved:
+                playerlist[playernow].moved=0
+                if startscript==1: #如果已经作祟
+                    for i in currentplayerlist: #检测有无人物在同一房间
+                        if i!=playernow:
+                            if playerlist[i].pos==playerlist[playernow].pos and (i==traitor or playernow==traitor):#身处同一房间且其中一个是奸徒，开打！
+                                print("在同一房间且一方为奸徒")
+                                if Omenlist[6] in playerlist[playernow].bag:  #优先指环攻击
+                                    Omenfunclist[6](self,playerlist[playernow],playerlist[i])
+                                    continue
+                                playerlist[playernow].attack(playerlist[i]) 
+                                print("发动攻击")#发动袭击
+                        #疯汉或者书本打开总骰子数+1
+                        global adddice
+                    if whetheromenopen[0]==1:
+                        adddice+=1
+                    if whetheromenopen[3]==1:
+                        adddice+=1
+                    if playernow==traitor:
+                        if playerlist[playernow].pos.name=="礼拜堂" or playerlist[playernow].pos.name=="游戏室" or playerlist[playernow].pos.name=="手术室" or playerlist[playernow].pos.name=="研究室" or playerlist[playernow].pos.name=="五芒星堂":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("knowledge")
+                                if num>=4:
+                                    adddice-=3
+                                    playerlist[playernow].pos.whetherchecked=1
+                    else:
+                        if playerlist[playernow].pos.name=="图书馆":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("knowledge")
+                                print("图书馆知识考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="游戏室":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("mind")
+                                print("游戏室神志考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="健身房":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("speed")
+                                print("健身房速度考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="入口大堂":
+                            num=playerlist[playernow].test("knowledge")
+                            num+=playerlist[playernow].directtest(adddice)
+                            print("入口大堂可投掷额外骰子数%d"%adddice)
+                            print("入口大堂考验结果%d"%num)
+                            if num>=16:
+                                print("英雄胜利，游戏结束")
+                                pass
+                        num=playerlist[playernow].directtest(1)
+                        print("该回合损伤点数%d"%num)
+                        kind=random.randint(0,1)  #随机肉体/精神损伤
+                        if kind:
+                            playerlist[playernow].attributechange(-num,"body")
+                        else:
+                            playerlist[playernow].attributechange(-num,"spirit")
+                if currentplayerlist.index(playernow)==len(currentplayerlist)-1:
+                    playernow=currentplayerlist[0]
+                else:
+                    playernow=currentplayerlist[currentplayerlist.index(playernow)+1]
             for i in range(4):
                 for j in range(5):
                     if models.room.map[1][i][j] == 0:
@@ -739,8 +931,8 @@ class Ground_interface(Basicbackground):
                     playerlist[i].circleimage.draw(self.display_surface, playerlist[i].position[2] * 175 + 250 + a * 30,
                                                    playerlist[i].position[1] * 175 + 150 + b * 30)
             for i in deathlist:
-                playerlist[deathlist[i]].deathtext.draw(self.display_surface, self.playerimagepos[deathlist[i]][0],
-                                                       self.playerimagepos[deathlist[i]][1])
+                playerlist[i].deathtext.draw(self.display_surface, self.playerimagepos[i][0],
+                                                       self.playerimagepos[i][1])
             for event in pygame.event.get():
                 if event.type == CHANGEATTRIBUTE:
                     if event.message == "strength":
@@ -798,7 +990,8 @@ class Ground_interface(Basicbackground):
                                 try:
                                     # 调用物品的 effect 方法
                                     if callable(thing.effect):
-                                        thing.effect(playerlist[player_index])  # 假设 effect 需要玩家对象作为参数
+                                        bag_window.destroy()
+                                        thing.effect  # 假设 effect 需要玩家对象作为参数
                                     else:
                                         print(f"{thing.name} 的 effect 不是可调用方法")
 
@@ -807,10 +1000,10 @@ class Ground_interface(Basicbackground):
                                         playerlist[player_index].bag.remove(thing)  # 从背包中移除物品
                                         print(f"{thing.name} 已被移除")
 
-                                    # 关闭当前背包窗口并重新打开，刷新显示
-                                    bag_window.destroy()
-                                    # 重新触发背包打开事件
-                                    pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN))
+                                    ## 关闭当前背包窗口并重新打开，刷新显示
+                                    #bag_window.destroy()
+                                    ## 重新触发背包打开事件
+                                    #pygame.event.post(pygame.event.Event(pygame.MOUSEBUTTONDOWN))
                                 except Exception as e:
                                     print(f"执行 {thing.name} 的效果时出错: {e}")
 
@@ -836,77 +1029,83 @@ class Ground_interface(Basicbackground):
                                     print(f"加载图片失败: {e}")  # 打印异常信息
 
                             bag.mainloop()
-                    for i in range(len(playerlist[playernow].hurtbuttonlist)):
-                        if playerlist[playernow].hurtbuttonlist[i].handle_event():
-                            for j in range(len(playerlist[playernow].hurtbuttonlist)):
-                                pygame.draw.rect(self.display_surface, self.background_color,
-                                                 (self.hurttypepos[playernow][0] - self.hurtwidth / 2,
-                                                  self.hurttypepos[playernow][1] - self.hurtheight / 2 + j * 25,
-                                                  self.hurtwidth, self.hurtheight))
-                            if playerlist[playernow].testtype == "body":
-                                playerlist[playernow].attributechange(-i, "strength")
-                                playerlist[playernow].attributechange(i - len(playerlist[playernow].hurtbuttonlist) + 1,
-                                                                      "speed")
-                            else:
-                                playerlist[playernow].attributechange(-i, "mind")
-                                playerlist[playernow].attributechange(i - len(playerlist[playernow].hurtbuttonlist) + 1,
-                                                                      "knowledge")
-                            playerlist[playernow].hurtbuttonlist = []
-                            break
+                    for i in currentplayerlist:
+                        for j in range(len(playerlist[i].hurtbuttonlist)):
+                            if playerlist[i].hurtbuttonlist[j].handle_event():
+                                for j in range(len(playerlist[i].hurtbuttonlist)):
+                                    pygame.draw.rect(self.display_surface, self.background_color,
+                                                     (self.hurttypepos[i][0] - self.hurtwidth / 2,
+                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + j * 25,
+                                                      self.hurtwidth, self.hurtheight))
+                                if playerlist[i].testtype == "body":
+                                    playerlist[i].attributechange(-j, "strength")
+                                    playerlist[i].attributechange(j - len(playerlist[i].hurtbuttonlist) + 1,
+                                                                          "speed")
+                                else:
+                                    playerlist[i].attributechange(-j, "mind")
+                                    playerlist[i].attributechange(j - len(playerlist[i].hurtbuttonlist) + 1,
+                                                                          "knowledge")
+                                playerlist[i].hurtbuttonlist = []
+                                break
                     for i in range(3):
                         if self.levelbuttonlist[i].handle_event():
                             self.running = False
                             levellist[i].run()
-                    for i in range(4):
+                    for i in range(4): #点击房间图片就放大缩小房间
                         for j in range(5):
-                            if self.roomlist[i][j]!= 0:
-                                if self.roomlist[i][j].handle_event():
-                                    if self.roomlist[i][j].scalenow == 0:
-                                        self.roomlist[i][j].scalechange(self.display_surface, self.bigroomscale)
-                                        self.roomlist[i][j].scalenow = 1
+                            if models.room.map[1][i][j] !=0:
+                                if models.room.map[1][i][j].image.handle_event():
+                                    print(models.room.map[1][i][j].image.scalenow)
+                                    if models.room.map[1][i][j].image.scalenow==0: 
+                                        models.room.map[1][i][j].image.scalechange(self.display_surface,self.bigroomscale)
+                                        models.room.map[1][i][j].image.scalenow=1
                                     else:
-                                        pygame.draw.rect(self.display_surface, self.background_color,
-                                                         (self.roomlist[i][j].upperleft_x, self.roomlist[i][j].upperleft_y,
-                                                          self.roomlist[i][j].img_width_scaled,
-                                                          self.roomlist[i][j].img_height_scaled))
-                                        self.roomlist[i][j].scalenow = 0
-                                        if (i == 0 and j == 0) or (i == 0 and j == 4) or (i == 3 and j == 0) or (
-                                                i == 3 and j == 4):
+                                        print("here")
+                                        pygame.draw.rect(self.display_surface, self.background_color,(models.room.map[1][i][j].image.upperleft_x, models.room.map[1][i][j].image.upperleft_y, models.room.map[1][i][j].image.img_width_scaled, models.room.map[1][i][j].image.img_height_scaled))
+                                        models.room.map[1][i][j].image.scalechange(self.display_surface,0.35)
+                                        models.room.map[1][i][j].image.scalenow=0
+                                        if (i==0 and j==0) or (i==0 and j==4) or(i==3 and j==0) or (i==3 and j==4):
                                             for i in range(4):
-                                                playerlist[i].image.draw(self.display_surface, self.playerimagepos[i][0],
-                                                                         self.playerimagepos[i][1])
-                                        if i == 0:
+                                                playerlist[i].image.draw(self.display_surface,self.playerimagepos[i][0],self.playerimagepos[i][1])
+                                        if i==0:
                                             for i in range(3):
-                                                self.levelbuttonlist[i].draw(self.display_surface,
-                                                                             self.levelbuttonpos[i][0],
-                                                                             self.levelbuttonpos[i][1])
-                                            self.levelbuttonlist[1] = ButtonText("地面", color.RED, "HYJinShi-95W.ttf", 30)
-                                            self.levelbuttonlist[1].draw(self.display_surface, 600, 40)
-                                        for i in range(4):
-                                            for j in range(5):
-                                                self.room.draw(self.display_surface, self.startpos[0] + j * self.roomlength,
-                                                               self.startpos[1] + i * self.roomlength)
+                                                self.levelbuttonlist[i].draw(self.display_surface,self.levelbuttonpos[i][0],self.levelbuttonpos[i][1])
+                                            self.levelbuttonlist[1]=ButtonText("地面",color.RED,"HYJinShi-95W.ttf",30)
+                                            self.levelbuttonlist[1].draw(self.display_surface,600,40)
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         print("空格键被按下")
-                        playerlist[0].move(4)
+                        playerlist[playernow].move(4)
                     if event.key == pygame.K_RETURN:
                         print("Enter键被按下")
+                        playerlist[playernow].move(5)
                     if event.key == pygame.K_UP:
                         print("上方向键被按下")
-                        playerlist[0].move(0)
+                        playerlist[playernow].move(0)
                     if event.key == pygame.K_DOWN:
                         print("下方向键被按下")
-                        playerlist[0].move(2)
+                        playerlist[playernow].move(2)
                     if event.key == pygame.K_LEFT:
                         print("左方向键被按下")
-                        playerlist[0].move(3)
+                        playerlist[playernow].move(3)
                     if event.key == pygame.K_RIGHT:
                         print("右方向键被按下")
-                        playerlist[0].move(1)
+                        playerlist[playernow].move(1)
                 elif event.type == pygame.QUIT:
                     self.running = False
             pygame.display.update()
+            #while levellist[levelnow].running:
+            #    if len(currentplayerlist)==1:
+            #        if currentplayerlist[0]==traitor:
+            #            print("奸徒胜利，游戏结束")
+            #            pass
+            #if playerlist[playernow].moved:
+           
+            #    playerlist[playernow].moved=0
+            #    if currentplayerlist.index(playernow)==len(currentplayerlist)-1:
+            #        playernow=currentplayerlist[0]
+            #    else:
+            #        playernow=currentplayerlist[currentplayerlist.index(playernow)+1]
 
 
         pygame.quit()
@@ -923,6 +1122,73 @@ class Upstairs_interface(Basicbackground):
         self.upstairsbutton.draw(self.display_surface,700,40)
         self.roomlist=[[0 for i in range(5)] for j in range(4)]
         while self.running:
+            global playernow
+            if playerlist[playernow].moved:
+                playerlist[playernow].moved=0
+                if startscript==1: #如果已经作祟
+                    for i in currentplayerlist: #检测有无人物在同一房间
+                        if i!=playernow:
+                            if playerlist[i].pos==playerlist[playernow].pos and (i==traitor or playernow==traitor):#身处同一房间且其中一个是奸徒，开打！
+                                print("在同一房间且一方为奸徒")
+                                if Omenlist[6] in playerlist[playernow].bag:  #优先指环攻击
+                                    Omenfunclist[6](self,playerlist[playernow],playerlist[i])
+                                    continue
+                                playerlist[playernow].attack(playerlist[i]) 
+                                print("发动攻击")#发动袭击
+                        #疯汉或者书本打开总骰子数+1
+                        global adddice
+                    if whetheromenopen[0]==1:
+                        adddice+=1
+                    if whetheromenopen[3]==1:
+                        adddice+=1
+                    if playernow==traitor:
+                        if playerlist[playernow].pos.name=="礼拜堂" or playerlist[playernow].pos.name=="游戏室" or playerlist[playernow].pos.name=="手术室" or playerlist[playernow].pos.name=="研究室" or playerlist[playernow].pos.name=="五芒星堂":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("knowledge")
+                                if num>=4:
+                                    adddice-=3
+                                    playerlist[playernow].pos.whetherchecked=1
+                    else:
+                        if playerlist[playernow].pos.name=="图书馆":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("knowledge")
+                                print("图书馆知识考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="游戏室":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("mind")
+                                print("游戏室神志考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="健身房":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("speed")
+                                print("健身房速度考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="入口大堂":
+                            num=playerlist[playernow].test("knowledge")
+                            num+=playerlist[playernow].directtest(adddice)
+                            print("入口大堂可投掷额外骰子数%d"%adddice)
+                            print("入口大堂考验结果%d"%num)
+                            if num>=16:
+                                print("英雄胜利，游戏结束")
+                                pass
+                        num=playerlist[playernow].directtest(1)
+                        print("该回合损伤点数%d"%num)
+                        kind=random.randint(0,1)  #随机肉体/精神损伤
+                        if kind:
+                            playerlist[playernow].attributechange(-num,"body")
+                        else:
+                            playerlist[playernow].attributechange(-num,"spirit")
+                if currentplayerlist.index(playernow)==len(currentplayerlist)-1:
+                    playernow=currentplayerlist[0]
+                else:
+                    playernow=currentplayerlist[currentplayerlist.index(playernow)+1]
             for i in range(4):
                 for j in range(5):
                     if models.room.map[2][i][j] == 0:
@@ -1028,16 +1294,24 @@ class Upstairs_interface(Basicbackground):
                                     print(f"加载图片失败: {e}")  # 打印异常信息
 
                             bag.mainloop()
-                    for i in range(len(playerlist[playernow].hurtbuttonlist)):
-                        if playerlist[playernow].hurtbuttonlist[i].handle_event():
-                            if playerlist[playernow].testtype=="body":
-                                playerlist[playernow].attributechange(-i,"strength")
-                                playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"speed")
-                            else:
-                                playerlist[playernow].attributechange(-i,"mind")
-                                playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"knowledge")
-                            playerlist[playernow].hurtbuttonlist=[]
-                            break
+                    for i in currentplayerlist:
+                        for j in range(len(playerlist[i].hurtbuttonlist)):
+                            if playerlist[i].hurtbuttonlist[j].handle_event():
+                                for j in range(len(playerlist[i].hurtbuttonlist)):
+                                    pygame.draw.rect(self.display_surface, self.background_color,
+                                                     (self.hurttypepos[i][0] - self.hurtwidth / 2,
+                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + j * 25,
+                                                      self.hurtwidth, self.hurtheight))
+                                if playerlist[i].testtype == "body":
+                                    playerlist[i].attributechange(-j, "strength")
+                                    playerlist[i].attributechange(j - len(playerlist[i].hurtbuttonlist) + 1,
+                                                                          "speed")
+                                else:
+                                    playerlist[i].attributechange(-j, "mind")
+                                    playerlist[i].attributechange(j - len(playerlist[i].hurtbuttonlist) + 1,
+                                                                          "knowledge")
+                                playerlist[i].hurtbuttonlist = []
+                                break
                     for i in range(3):
                         if self.levelbuttonlist[i].handle_event():
                             self.running=False
@@ -1066,26 +1340,26 @@ class Upstairs_interface(Basicbackground):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:  # 检测到空格键被按下
                         print("空格键被按下")
-                        playerlist[0].move(4)
+                        playerlist[playernow].move(4)
                     if event.key == pygame.K_RETURN:
                         print("Enter键被按下")
-
+                        playerlist[playernow].move(5)
                         # 检测上下左右方向键
                     if event.key == pygame.K_UP:
                         print("上方向键被按下")
-                        playerlist[0].move(0)
+                        playerlist[playernow].move(0)
                            
                     if event.key == pygame.K_DOWN:
                         print("下方向键被按下")
-                        playerlist[0].move(2)
+                        playerlist[playernow].move(2)
                             
                     if event.key == pygame.K_LEFT:
                         print("左方向键被按下")
-                        playerlist[0].move(3)
+                        playerlist[playernow].move(3)
                            
                     if event.key == pygame.K_RIGHT:
                         print("右方向键被按下") 
-                        playerlist[0].move(1)      
+                        playerlist[playernow].move(1)      
                 elif event.type == pygame.QUIT:
                     self.running=False
             
@@ -1105,6 +1379,73 @@ class Downstairs_interface(Basicbackground):
         self.downstairsbutton.draw(self.display_surface,500,40)
         self.roomlist=[[0 for i in range(5)] for j in range(4)]
         while self.running:
+            global playernow
+            if playerlist[playernow].moved:
+                playerlist[playernow].moved=0
+                if startscript==1: #如果已经作祟
+                    for i in currentplayerlist: #检测有无人物在同一房间
+                        if i!=playernow:
+                            if playerlist[i].pos==playerlist[playernow].pos and (i==traitor or playernow==traitor):#身处同一房间且其中一个是奸徒，开打！
+                                print("在同一房间且一方为奸徒")
+                                if Omenlist[6] in playerlist[playernow].bag:  #优先指环攻击
+                                    Omenfunclist[6](self,playerlist[playernow],playerlist[i])
+                                    continue
+                                playerlist[playernow].attack(playerlist[i]) 
+                                print("发动攻击")#发动袭击
+                        #疯汉或者书本打开总骰子数+1
+                        global adddice
+                    if whetheromenopen[0]==1:
+                        adddice+=1
+                    if whetheromenopen[3]==1:
+                        adddice+=1
+                    if playernow==traitor:
+                        if playerlist[playernow].pos.name=="礼拜堂" or playerlist[playernow].pos.name=="游戏室" or playerlist[playernow].pos.name=="手术室" or playerlist[playernow].pos.name=="研究室" or playerlist[playernow].pos.name=="五芒星堂":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("knowledge")
+                                if num>=4:
+                                    adddice-=3
+                                    playerlist[playernow].pos.whetherchecked=1
+                    else:
+                        if playerlist[playernow].pos.name=="图书馆":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("knowledge")
+                                print("图书馆知识考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="游戏室":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("mind")
+                                print("游戏室神志考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="健身房":
+                            if playerlist[playernow].pos.whetherchecked==0:
+                                num=playerlist[playernow].test("speed")
+                                print("健身房速度考验结果%d"%num)
+                                if num>=5:
+                                    adddice+=2
+                                    playerlist[playernow].pos.whetherchecked=1
+                        elif playerlist[playernow].pos.name=="入口大堂":
+                            num=playerlist[playernow].test("knowledge")
+                            num+=playerlist[playernow].directtest(adddice)
+                            print("入口大堂可投掷额外骰子数%d"%adddice)
+                            print("入口大堂考验结果%d"%num)
+                            if num>=16:
+                                print("英雄胜利，游戏结束")
+                                pass
+                        num=playerlist[playernow].directtest(1)
+                        print("该回合损伤点数%d"%num)
+                        kind=random.randint(0,1)  #随机肉体/精神损伤
+                        if kind:
+                            playerlist[playernow].attributechange(-num,"body")
+                        else:
+                            playerlist[playernow].attributechange(-num,"spirit")
+                if currentplayerlist.index(playernow)==len(currentplayerlist)-1:
+                    playernow=currentplayerlist[0]
+                else:
+                    playernow=currentplayerlist[currentplayerlist.index(playernow)+1]
             for i in range(4):
                 for j in range(5):
                     if models.room.map[0][i][j] == 0:
@@ -1210,16 +1551,24 @@ class Downstairs_interface(Basicbackground):
                                     print(f"加载图片失败: {e}")  # 打印异常信息
 
                             bag.mainloop()
-                    for i in range(len(playerlist[playernow].hurtbuttonlist)):
-                        if playerlist[playernow].hurtbuttonlist[i].handle_event():
-                            if playerlist[playernow].testtype=="body":
-                                playerlist[playernow].attributechange(-i,"strength")
-                                playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"speed")
-                            else:
-                                playerlist[playernow].attributechange(-i,"mind")
-                                playerlist[playernow].attributechange(i-len(playerlist[playernow].hurtbuttonlist)+1,"knowledge")
-                            playerlist[playernow].hurtbuttonlist=[]
-                            break
+                    for i in currentplayerlist:
+                        for j in range(len(playerlist[i].hurtbuttonlist)):
+                            if playerlist[i].hurtbuttonlist[j].handle_event():
+                                for j in range(len(playerlist[i].hurtbuttonlist)):
+                                    pygame.draw.rect(self.display_surface, self.background_color,
+                                                     (self.hurttypepos[i][0] - self.hurtwidth / 2,
+                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + j * 25,
+                                                      self.hurtwidth, self.hurtheight))
+                                if playerlist[i].testtype == "body":
+                                    playerlist[i].attributechange(-j, "strength")
+                                    playerlist[i].attributechange(j - len(playerlist[i].hurtbuttonlist) + 1,
+                                                                          "speed")
+                                else:
+                                    playerlist[i].attributechange(-j, "mind")
+                                    playerlist[i].attributechange(j - len(playerlist[i].hurtbuttonlist) + 1,
+                                                                          "knowledge")
+                                playerlist[i].hurtbuttonlist = []
+                                break
                     for i in range(3):
                         if self.levelbuttonlist[i].handle_event():
                             self.running=False
@@ -1249,26 +1598,26 @@ class Downstairs_interface(Basicbackground):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:  # 检测到空格键被按下
                         print("空格键被按下")
-                        playerlist[0].move(4)
+                        playerlist[playernow].move(4)
                     if event.key == pygame.K_RETURN:
                         print("Enter键被按下")
-
+                        playerlist[playernow].move(5)
                         # 检测上下左右方向键
                     if event.key == pygame.K_UP:
                         print("上方向键被按下")
-                        playerlist[0].move(0)
+                        playerlist[playernow].move(0)
                            
                     if event.key == pygame.K_DOWN:
                         print("下方向键被按下")
-                        playerlist[0].move(2)
+                        playerlist[playernow].move(2)
                             
                     if event.key == pygame.K_LEFT:
                         print("左方向键被按下")
-                        playerlist[0].move(3)
+                        playerlist[playernow].move(3)
                            
                     if event.key == pygame.K_RIGHT:
                         print("右方向键被按下") 
-                        playerlist[0].move(1)      
+                        playerlist[playernow].move(1)      
                 elif event.type == pygame.QUIT:
                     self.running=False
                
