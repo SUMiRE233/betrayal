@@ -115,7 +115,21 @@ class Commoncharacter:
                 sum+=self.Rolldice()
         return sum        
     def attack(self,enemy): #能力攻击 
+        if Omenlist[6] in self.bag:
+            print("指环神志攻击")
+            numself=self.test("mind")
+            print("自己骰子数%d"%numself)
+            numenemy=enemy.test("mind")
+            print("对方骰子数%d"%numenemy)
+            if numself>numenemy:
+                enemy.attributechange(numenemy-numself,"spirit")
+            elif numself<numenemy:
+                self.attributechange(numself-numenemy,"spirit")
+            return 
         numself=self.test("strength")
+        if Omenlist[7] in self.bag:
+            print("使用长矛发动攻击")
+            numself+=self.directtest(2)
         print("自己骰子数%d"%numself)
         numenemy=enemy.test("strength")
         print("对方骰子数%d"%numenemy)
@@ -364,20 +378,21 @@ class Commoncharacter:
             
     def revealtruth(self):
         sum=0
-        for i in range(6):
+        for i in range(4):
             sum+=self.Rolldice()
         print("揭露真相点数%d"%sum)
         print("现有预兆总数%d"%totalomen)
         if sum<totalomen:
             global startscript
             startscript=1
+            print("开始作祟")
             global traitor
             traitor=playernow
             for i in currentplayerlist:
                 if i!=playernow:
                     if playerlist[i].mind>playerlist[traitor].mind:
                         traitor=i
-            print(traitor)
+            print("人物%d是奸徒"%traitor)
             return True
         return False
   
@@ -845,25 +860,26 @@ class Ground_interface(Basicbackground):
             if playerlist[playernow].moved:
                 playerlist[playernow].moved=0
                 if startscript==1: #如果已经作祟
+                    global adddice
+                    print("现有额外骰子数%d"%adddice)
                     for i in currentplayerlist: #检测有无人物在同一房间
                         if i!=playernow:
                             if playerlist[i].pos==playerlist[playernow].pos and (i==traitor or playernow==traitor):#身处同一房间且其中一个是奸徒，开打！
                                 print("在同一房间且一方为奸徒")
-                                if Omenlist[6] in playerlist[playernow].bag:  #优先指环攻击
-                                    Omenfunclist[6](self,playerlist[playernow],playerlist[i])
-                                    continue
                                 playerlist[playernow].attack(playerlist[i]) 
                                 print("发动攻击")#发动袭击
-                        #疯汉或者书本打开总骰子数+1
-                        global adddice
+                        #疯汉或者书本打开总骰子数+2
+                    
                     if whetheromenopen[0]==1:
-                        adddice+=1
+                        adddice+=2
                     if whetheromenopen[3]==1:
-                        adddice+=1
+                        adddice+=2
                     if playernow==traitor:
-                        if playerlist[playernow].pos.name=="礼拜堂" or playerlist[playernow].pos.name=="游戏室" or playerlist[playernow].pos.name=="手术室" or playerlist[playernow].pos.name=="研究室" or playerlist[playernow].pos.name=="五芒星堂":
+                        print("奸徒所在房间%s"%playerlist[playernow].pos.name)
+                        if playerlist[playernow].pos.name=="礼拜堂" or playerlist[playernow].pos.name=="庭院" or playerlist[playernow].pos.name=="手术室" or playerlist[playernow].pos.name=="研究室" or playerlist[playernow].pos.name=="五芒星堂":
                             if playerlist[playernow].pos.whetherchecked==0:
                                 num=playerlist[playernow].test("knowledge")
+                                print("奸徒知识考验结果%d"%num)
                                 if num>=4:
                                     adddice-=3
                                     playerlist[playernow].pos.whetherchecked=1
@@ -1032,10 +1048,10 @@ class Ground_interface(Basicbackground):
                     for i in currentplayerlist:
                         for j in range(len(playerlist[i].hurtbuttonlist)):
                             if playerlist[i].hurtbuttonlist[j].handle_event():
-                                for j in range(len(playerlist[i].hurtbuttonlist)):
+                                for k in range(len(playerlist[i].hurtbuttonlist)):
                                     pygame.draw.rect(self.display_surface, self.background_color,
                                                      (self.hurttypepos[i][0] - self.hurtwidth / 2,
-                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + j * 25,
+                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + k * 25,
                                                       self.hurtwidth, self.hurtheight))
                                 if playerlist[i].testtype == "body":
                                     playerlist[i].attributechange(-j, "strength")
@@ -1126,6 +1142,8 @@ class Upstairs_interface(Basicbackground):
             if playerlist[playernow].moved:
                 playerlist[playernow].moved=0
                 if startscript==1: #如果已经作祟
+                    global adddice
+                    print("现有额外骰子数%d"%adddice)
                     for i in currentplayerlist: #检测有无人物在同一房间
                         if i!=playernow:
                             if playerlist[i].pos==playerlist[playernow].pos and (i==traitor or playernow==traitor):#身处同一房间且其中一个是奸徒，开打！
@@ -1136,7 +1154,6 @@ class Upstairs_interface(Basicbackground):
                                 playerlist[playernow].attack(playerlist[i]) 
                                 print("发动攻击")#发动袭击
                         #疯汉或者书本打开总骰子数+1
-                        global adddice
                     if whetheromenopen[0]==1:
                         adddice+=1
                     if whetheromenopen[3]==1:
@@ -1145,6 +1162,7 @@ class Upstairs_interface(Basicbackground):
                         if playerlist[playernow].pos.name=="礼拜堂" or playerlist[playernow].pos.name=="游戏室" or playerlist[playernow].pos.name=="手术室" or playerlist[playernow].pos.name=="研究室" or playerlist[playernow].pos.name=="五芒星堂":
                             if playerlist[playernow].pos.whetherchecked==0:
                                 num=playerlist[playernow].test("knowledge")
+                                print("奸徒知识考验结果%d"%num)
                                 if num>=4:
                                     adddice-=3
                                     playerlist[playernow].pos.whetherchecked=1
@@ -1297,10 +1315,10 @@ class Upstairs_interface(Basicbackground):
                     for i in currentplayerlist:
                         for j in range(len(playerlist[i].hurtbuttonlist)):
                             if playerlist[i].hurtbuttonlist[j].handle_event():
-                                for j in range(len(playerlist[i].hurtbuttonlist)):
+                                for k in range(len(playerlist[i].hurtbuttonlist)):
                                     pygame.draw.rect(self.display_surface, self.background_color,
                                                      (self.hurttypepos[i][0] - self.hurtwidth / 2,
-                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + j * 25,
+                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + k * 25,
                                                       self.hurtwidth, self.hurtheight))
                                 if playerlist[i].testtype == "body":
                                     playerlist[i].attributechange(-j, "strength")
@@ -1383,6 +1401,8 @@ class Downstairs_interface(Basicbackground):
             if playerlist[playernow].moved:
                 playerlist[playernow].moved=0
                 if startscript==1: #如果已经作祟
+                    global adddice
+                    print("现有额外骰子数%d"%adddice)
                     for i in currentplayerlist: #检测有无人物在同一房间
                         if i!=playernow:
                             if playerlist[i].pos==playerlist[playernow].pos and (i==traitor or playernow==traitor):#身处同一房间且其中一个是奸徒，开打！
@@ -1393,7 +1413,6 @@ class Downstairs_interface(Basicbackground):
                                 playerlist[playernow].attack(playerlist[i]) 
                                 print("发动攻击")#发动袭击
                         #疯汉或者书本打开总骰子数+1
-                        global adddice
                     if whetheromenopen[0]==1:
                         adddice+=1
                     if whetheromenopen[3]==1:
@@ -1402,6 +1421,7 @@ class Downstairs_interface(Basicbackground):
                         if playerlist[playernow].pos.name=="礼拜堂" or playerlist[playernow].pos.name=="游戏室" or playerlist[playernow].pos.name=="手术室" or playerlist[playernow].pos.name=="研究室" or playerlist[playernow].pos.name=="五芒星堂":
                             if playerlist[playernow].pos.whetherchecked==0:
                                 num=playerlist[playernow].test("knowledge")
+                                print("奸徒知识考验结果%d"%num)
                                 if num>=4:
                                     adddice-=3
                                     playerlist[playernow].pos.whetherchecked=1
@@ -1554,10 +1574,10 @@ class Downstairs_interface(Basicbackground):
                     for i in currentplayerlist:
                         for j in range(len(playerlist[i].hurtbuttonlist)):
                             if playerlist[i].hurtbuttonlist[j].handle_event():
-                                for j in range(len(playerlist[i].hurtbuttonlist)):
+                                for k in range(len(playerlist[i].hurtbuttonlist)):
                                     pygame.draw.rect(self.display_surface, self.background_color,
                                                      (self.hurttypepos[i][0] - self.hurtwidth / 2,
-                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + j * 25,
+                                                      self.hurttypepos[i][1] - self.hurtheight / 2 + k * 25,
                                                       self.hurtwidth, self.hurtheight))
                                 if playerlist[i].testtype == "body":
                                     playerlist[i].attributechange(-j, "strength")

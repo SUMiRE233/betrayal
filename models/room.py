@@ -15,6 +15,7 @@ class room:
         self.obj_name = obj_name
         self.image = Button(fr"图片\房间\{obj_name}.jpg",0.35)
         self.connect_room = [0,0,0,0,0]
+        self.whetherchecked = 0
     def trigger(self,character):
         character.getcards(self.room_type)
         print("has triggered!")

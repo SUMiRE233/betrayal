@@ -61,31 +61,12 @@ Omenlist.append(bite)
 class Ringomen:
     def __init__(self, image):
         self.image = Image(img_name = image)
-    def Ring(self,character,enemy): #能力攻击  value:该能力属性值
-        numself=character.test("mind")
-        numenemy=enemy.test("mind")
-        if numself>numenemy:
-            enemy.attributechange(numenemy-numself,"spirit")
-        elif numself<numenemy:
-            character.attributechange(numself-numenemy,"spirit")
 ring=Ringomen(image = r"图片/预兆/ring.jpg")
-Omenfunclist.append(Ringomen.Ring)
 Omenlist.append(ring)
 class Spearomen:
     def __init__(self, image):
         self.image = Image(img_name = image)
-    def Spear(self,attacker,enemy): #能力攻击 
-        numself=attacker.test("strength")
-        numself+=attacker.directtest(2)
-        numenemy=enemy.test("strength")
-        print(numself)
-        print(numenemy)
-        if numself>numenemy:
-            enemy.attributechange(numenemy-numself,"body")
-        elif numself<numenemy:
-            self.attributechange(numself-numenemy,"body")
 spear=Spearomen(image = r"图片/预兆/spear.jpg")
-Omenfunclist.append(Spearomen.Spear)
 Omenlist.append(spear)
 
 whetheromenopen=[0 for i in range(len(Omenlist))]
