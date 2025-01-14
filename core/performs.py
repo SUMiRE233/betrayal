@@ -61,39 +61,7 @@ class Commoncharacter:
         root.mainloop()
         print(result_num)
         return result_num
-    #tkinter制作骰子效果尝试
-        """
-        dicewindow = tk.Tk()
-        dicewindow.geometry("400x400")  
-        dicewindow.title("掷骰子")
-        image=tk.PhotoImage(file="dice0.jpeg")
-        canvas = tk.Canvas(dicewindow, width=400, height=400)
-        canvas.pack()
-        x=100
-        y=100
-        dice = canvas.create_image(x,y,image,anchor='center')
-        dicewindow.update()
-        dicewindow.mainloop()
-        for i in range(30):
-            angle = randint(0, 360)
-            canvas.itemconfig(dice, image=images[randint(0, 2)])
-            x = 100 + randint(-20, 20)
-            y = 100 + randint(-20, 20)
-            canvas.coords(dice, x, y, x+50, y+50)
-            dicewindow.update()
-            dicewindow.after(50)
-        result = randint(0,2)
-        canvas.itemconfig(dice, image=images[result])
-        canvas.coords(dice, 175, 175, 225, 225)
-        def close_window():
-            dicewindow.destroy()
-        dicewindow = tk.Tk()
-        dicewindow.geometry("300x200")  
-        dicewindow.title("掷骰子")
-        label = tk.Label(dicewindow, text="这个窗口将在5秒后自动关闭。")
-        label.pack()
-        dicewindow.after(2000, close_window)
-        dicewindow.mainloop()"""
+    
     def directtest(self,num):   #num表示骰子个数
         sum=0
         for i in range(num):
@@ -273,19 +241,15 @@ class Commoncharacter:
             while whethereventopen[num]==1:
                 num=random.randint(0,len(Eventlist)-1)
             whethereventopen[num]=1
-        #    Eventlist[num].image.draw(levellist[levelnow].display_surface,75,400)
-            
-        #    img = PILImage.open(Eventlist[num].image)
-        #    img = img.resize((500,1000))
-        #    photo = ImageTk.PhotoImage(img)
-        #    photolist = []
-        #    photolist.append(photo)  # 将 PhotoImage 对象存入列表，防止被垃圾回收
-        #    # 创建 Label 并显示图片
-        #    label = tk.Label(bag, image=photo)
-        #    label.image = photo  # 保持引用
-        #    label.place(x=x, y=y)
-        #    labellist = []
-        #    labellist.append(label)  # 将 Label 对象存入列表
+            global photo
+            event = tk.Tk()
+            event.geometry("600x1200")
+            imagepath = Eventlist[num].image
+            image = PILImage.open(imagepath)
+            photo = ImageTk.PhotoImage(image)
+            label = tk.Label(event, image = photo)
+            label.pack()
+            event.mainloop()
             if num<=14:
                 Eventfunclist[num](self,self)
             else:
@@ -385,6 +349,26 @@ class Commoncharacter:
         if sum<totalomen:
             global startscript
             startscript=1
+            global scene
+            scene=tk.Tk()
+            scene.title("help")
+            resolution=scene.maxsize() #获取用户电脑分辨率
+            resolutionw,resolutionh=resolution
+            width=600
+            height=800
+            scene.geometry(f"{width}x{height}+{int(resolutionw*0.5)-int(width*0.5)}+{int(resolutionh*0.5)-int(height*0.5)}") #设置窗口打开位置
+            scene.resizable(False,False)
+            #screen.iconbitmap("") 只支持ICO
+            title=tk.Label(scene,text="迷失空间",font=("黑体",24),fg="red",bg="black")
+            title.pack() #默认布局
+            with open("迷失空间.txt",'r',encoding='utf-8') as file:
+                content = file.read()
+            text = tk.Text(scene,font=("宋体",18))
+            text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            scrollbar = tk.Scrollbar(scene, orient="vertical") #设置滚动条
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            text.insert(tk.END, content) 
+            scene.mainloop()
             print("开始作祟")
             global traitor
             traitor=playernow

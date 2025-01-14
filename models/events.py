@@ -8,7 +8,7 @@ Eventfunclist=[]
 whethereventopen=[]
 class Contractevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\contract.jpg",0.3)
+        self.image=r"图片/事件/contract.jpg"
         self.name="contract"
         pass
     def Contract(self,character):
@@ -26,7 +26,7 @@ Eventlist.append(contract)
 Eventfunclist.append(Contractevent.Contract)
 class Nightshadowevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\nightshadow.jpg",0.3)
+        self.image=r"图片/事件/nightshadow.jpg"
         self.name="nightshadow"
         pass
     def Nightshadow(self,character):
@@ -36,7 +36,7 @@ Eventlist.append(nightshadow)
 Eventfunclist.append(Nightshadowevent.Nightshadow)
 class Spiderevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\spider.jpg",0.3)
+        self.image=r"图片/事件/spider.jpg"
         self.name="spider"
         pass
     def Spider(self,character):
@@ -56,7 +56,7 @@ Eventlist.append(spider)
 Eventfunclist.append(Spiderevent.Spider)
 class Funeralevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\funeral.jpg",0.3)
+        self.image=r"图片/事件/funeral.jpg"
         self.name="funeral"
         pass
     def Funeral(self,character):
@@ -74,7 +74,7 @@ Eventlist.append(funeral)
 Eventfunclist.append(Funeralevent.Funeral)
 class Wormevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\worm.jpg",0.3)
+        self.image=r"图片/事件/worm.jpg"
         self.name="worm"
         pass
     def Worm(self,character):
@@ -90,7 +90,7 @@ Eventlist.append(worm)
 Eventfunclist.append(Wormevent.Worm)
 class Uneasynoiseevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\uneasynoise.jpg",0.3)
+        self.image=r"图片/事件/uneasynoise.jpg"
         self.name="uneasynoise"
         pass
     def Uneasynoise(self,character):
@@ -105,7 +105,7 @@ Eventlist.append(uneasynoise)
 Eventfunclist.append(Uneasynoiseevent.Uneasynoise)
 class Mirrorimageevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\mirrorimage.jpg",0.3)
+        self.image=r"图片/事件/mirrorimage.jpg"
         self.name="mirrorimage"
         pass
     def Mirrorimage(self,character):
@@ -116,7 +116,7 @@ Eventfunclist.append(Mirrorimageevent.Mirrorimage)
 
 class Telephoneringevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\telephonering.jpg",0.3)
+        self.image=r"图片/事件/telephonering.jpg"
         self.name="telephonering"
         pass
     def Telephonering(self,character):
@@ -136,7 +136,7 @@ Eventlist.append(telephonering)
 Eventfunclist.append(Telephoneringevent.Telephonering)
 class Rotevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\rot.jpg",0.3)
+        self.image=r"图片/事件/rot.jpg"
         self.name="rot"
         pass
     def Rot(self,character):
@@ -158,7 +158,7 @@ Eventlist.append(rot)
 Eventfunclist.append(Rotevent.Rot)
 class Stickyevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\sticky.jpg",0.3)
+        self.image=r"图片/事件/sticky.jpg"
         self.name="sticky"
         pass
     def Sticky(self,character):
@@ -175,7 +175,7 @@ Eventlist.append(sticky)
 Eventfunclist.append(Stickyevent.Sticky)
 class Soundevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\sound.jpg",0.3)
+        self.image=r"图片/事件/sound.jpg"
         self.name="sound"
         pass
     def Sound(self,character):
@@ -187,7 +187,7 @@ Eventlist.append(sound)
 Eventfunclist.append(Soundevent.Sound)
 class Acupunctureevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\acupuncture.jpg",0.3)
+        self.image=r"图片/事件/acupuncture.jpg"
         self.name="acupuncture"
         pass
     def Acupuncture(self,character):
@@ -207,7 +207,7 @@ Eventlist.append(acupuncture)
 Eventfunclist.append(Acupunctureevent.Acupuncture)
 class Gardenerevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\gardener.jpg",0.3)
+        self.image=r"图片/事件/gardener.jpg"
         self.name="gardener"
         pass
     def Gardener(self,character):
@@ -224,7 +224,7 @@ Eventlist.append(gardener)
 Eventfunclist.append(Gardenerevent.Gardener)
 class Angrycreaturesevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\angrycreature.jpg",0.3)
+        self.image=r"图片/事件/angrycreature.jpg"
         self.name="angrycreature"
         pass
     def Angrycreatures(self,character):
@@ -244,7 +244,7 @@ Eventlist.append(angrycreatures)
 Eventfunclist.append(Angrycreaturesevent.Angrycreatures)
 class Mutantpetsevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\mutantpets.jpg",0.3)
+        self.image=r"图片/事件/mutantpets.jpg"
         self.name="mutantpets"
         pass
     def Mutantpets(self,character):
@@ -259,7 +259,7 @@ Eventlist.append(mutantpets)
 Eventfunclist.append(Mutantpetsevent.Mutantpets)
 class Screamevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\scream.jpg",0.3)
+        self.image=r"图片/事件/scream.jpg"
         self.name="scream"
         pass
     def Scream(self):
@@ -276,7 +276,7 @@ Eventlist.append(scream)
 Eventfunclist.append(Screamevent.Scream)
 class Silenceevent:
     def __init__(self):
-        self.image=Image(r"图片\事件\silence.jpg",0.3)
+        self.image=r"图片/事件/silence.jpg"
         self.name="silence"
         pass
     def Silence(self):
