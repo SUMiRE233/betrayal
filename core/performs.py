@@ -232,6 +232,16 @@ class Commoncharacter:
                 num=random.randint(0,len(Omenlist)-1)
             whetheromenopen[num]=1
             self.bag.append(Omenlist[num])
+            
+            global omenphoto
+            omen = tk.Tk()
+            omen.geometry("600x1200")
+            imagepath = Omenlist[num].image.img_name
+            image = PILImage.open(imagepath)
+            omenphoto = ImageTk.PhotoImage(image)
+            label = tk.Label(omen, image = omenphoto)
+            label.pack()
+            omen.mainloop()
             if num<6:
                 Omenfunclist[num](self,self)
             self.revealtruth()
@@ -342,7 +352,8 @@ class Commoncharacter:
             
     def revealtruth(self):
         sum=0
-        for i in range(4):
+        
+        for i in range(1):
             sum+=self.Rolldice()
         print("揭露真相点数%d"%sum)
         print("现有预兆总数%d"%totalomen)
